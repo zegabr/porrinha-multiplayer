@@ -3,6 +3,10 @@ plugins {
     id 'kotlin-android'
 }
 
+// acho que esse logo abaixo é o msm do que tá dentro do plugin, mas pra garantir dixei aí
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -34,6 +38,8 @@ android {
 
 dependencies {
 
+    implementation platform('com.google.firebase:firebase-bom:27.0.0')
+    implementation 'com.google.firebase:firebase-database-ktx'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
