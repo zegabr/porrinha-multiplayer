@@ -17,7 +17,7 @@ class LoginActivity : AppCompatActivity() {
     lateinit var editText : EditText
     lateinit var button: Button
 
-    var user: String = "" // TODO: trocar pra uma classe com localizacao, username e senha, rank, etc
+    var username: String = "" // TODO: trocar pra uma classe com localizacao, username e senha, rank, etc
     lateinit var database : FirebaseDatabase
     lateinit var userRef : DatabaseReference
 
@@ -31,10 +31,10 @@ class LoginActivity : AppCompatActivity() {
         database = FirebaseDatabase.getInstance()
 
         // checks if user name exists and get reference
-        user = getPlayerNameFromCache()
-        if (!user.equals("")){ // TODO: mudar esse check pra null qnd trocar pleyer por um objeto
+        username = getPlayerNameFromCache()
+        if (!username.equals("")){ // TODO: mudar esse check pra null qnd trocar pleyer por um objeto
             // pega referencia do user no database
-            userRef = database.getReference("users").child(user)
+            userRef = database.getReference("users").child(username)
             addEventListener()
             userRef.setValue("") // TODO: passar o novo objeto aqui caso nao tenha nada em userRef
             // TODO: pra o eventListener ser triggado e ele mudar de activity, vai precisar mudar algo no objeto dessa ref. Aparentemente colocar msma coisa que ja existe nao serve
@@ -45,13 +45,13 @@ class LoginActivity : AppCompatActivity() {
          * Logging the user in
          */
         button.setOnClickListener {
-            user = editText.text.toString()
+            username = editText.text.toString()
             editText.text.clear()
-            if (!user.equals("")) {
+            if (!username.equals("")) {
                 button.setText("LOGGING IN")
                 button.isEnabled = false
 
-                userRef = database.getReference("users").child(user) // pega referencia do user no database (users/{username})
+                userRef = database.getReference("users").child(username) // pega referencia do user no database (users/{username})
                 addEventListener()
                 userRef.setValue("") // TODO: ver o todo no setValue de cima
             }
@@ -65,14 +65,9 @@ class LoginActivity : AppCompatActivity() {
         // read from database
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!user.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
-
+                if (!username.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
                     addCurrentPlayerToCache()
-
-                    // chama a proxima tela
-                    startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
-                    // encerra activity atual
-                    finish()
+                    goToLobbyScreen() // chama a proxima tela
                 }
             }
 
@@ -86,6 +81,11 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
+    private fun goToLobbyScreen() {
+        startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
+        finish()// encerra activity atual
+    }
+
     /**
      * Adiciona user atual no cache pra quando abrir o app de novo nao precisar logar
      */
@@ -95,7 +95,7 @@ class LoginActivity : AppCompatActivity() {
             0
         )
         val editor = preferences.edit()
-        editor.putString("user", user) // seta o valor user
+        editor.putString("playerName", username) // seta o valor user
         editor.apply() // adicionou o user na cache, qnd logar de novo ele vai estar lá
     }
 
@@ -104,6 +104,6 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun getPlayerNameFromCache(): String {
         val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
-        return preferences.getString("user", "").toString()
+        return preferences.getString("playerName", "").toString()
     }
 }
