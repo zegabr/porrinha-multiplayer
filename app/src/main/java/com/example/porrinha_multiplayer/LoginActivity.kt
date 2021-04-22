@@ -3,77 +3,76 @@ package com.example.porrinha_multiplayer
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.porrinha_multiplayer.databinding.ActivityLoginBinding
 import com.google.firebase.database.*
 
 
 class LoginActivity : AppCompatActivity() {
 
+    lateinit var binding : ActivityLoginBinding
     lateinit var editText : EditText
     lateinit var button: Button
 
-    var playerName: String = ""
-
+    var user: String = "" // TODO: trocar pra uma classe com localizacao, username e senha, rank, etc
     lateinit var database : FirebaseDatabase
-    lateinit var playerRef : DatabaseReference
+    lateinit var userRef : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        editText = findViewById(R.id.editTextLogin)
-        button = findViewById(R.id.buttonLogin)
-
+        editText = binding.editTextLogin
+        button = binding.buttonLogin
         database = FirebaseDatabase.getInstance()
 
-        // checks if player name exists and get reference
-        var preferences : SharedPreferences = getSharedPreferences("PREFS", 0) // pega as preferencias salvas na cache no diretorio PREFS/
-        playerName = preferences.getString("playerName", "").toString() // se existir playername lá, pega
-        if (!playerName.equals("")){
-            playerRef = database.getReference("players/$playerName") // pega referencia do player no database
+        // checks if user name exists and get reference
+        user = getPlayerNameFromCache()
+        if (!user.equals("")){ // TODO: mudar esse check pra null qnd trocar pleyer por um objeto
+            // pega referencia do user no database
+            userRef = database.getReference("users").child(user)
             addEventListener()
-            playerRef.setValue("") // ainda nao sei oq isso faz
+            userRef.setValue("") // TODO: passar o novo objeto aqui caso nao tenha nada em userRef
+            // TODO: pra o eventListener ser triggado e ele mudar de activity, vai precisar mudar algo no objeto dessa ref. Aparentemente colocar msma coisa que ja existe nao serve
+            // TODO: sugestao: colocar no objeto uma variavel lastLoginTime e dar update antes desse setValue(user), isso vai trigar a mudanca de activity
         }
 
         /**
-         * Logging the player in
+         * Logging the user in
          */
-        button.setOnClickListener(View.OnClickListener { v ->
-            playerName = editText.text.toString()
+        button.setOnClickListener {
+            user = editText.text.toString()
             editText.text.clear()
-            if (!playerName.equals("")) {
+            if (!user.equals("")) {
                 button.setText("LOGGING IN")
                 button.isEnabled = false
 
-                playerRef = database.getReference("players/$playerName") // pega referencia do player no database
+                userRef = database.getReference("users").child(user) // pega referencia do user no database (users/{username})
                 addEventListener()
-                playerRef.setValue("") // ainda nao sei oq isso faz
+                userRef.setValue("") // TODO: ver o todo no setValue de cima
             }
-
-        })
+        }
     }
 
+    /**
+     * Adiciona um listener que checa se a referencia pra o user atual foi modificada
+     */
     private fun addEventListener() {
         // read from database
-        playerRef.addValueEventListener(object : ValueEventListener {
+        userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!playerName.equals("")) {
+                if (!user.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
 
-                    val preferences: SharedPreferences = getSharedPreferences(
-                        "PREFS",
-                        0
-                    ) // pega as preferencias salvas na cache no diretorio PREFS/
-                    val editor = preferences.edit()
-                    editor.putString("playerName", playerName) // seta o valor playerName
-                    editor.apply()
+                    addCurrentPlayerToCache()
 
-                    val intent = Intent(this@LoginActivity, LobbyActivity::class.java)
-                    startActivity(intent)
-                    finish() // encerra activity atual
+                    // chama a proxima tela
+                    startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
+                    // encerra activity atual
+                    finish()
                 }
             }
 
@@ -81,9 +80,30 @@ class LoginActivity : AppCompatActivity() {
                 // Failed to read value
                 button.setText("LOG IN")
                 button.isEnabled = true
-                Toast.makeText(applicationContext, "Error", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Error Logging in", Toast.LENGTH_SHORT).show()
             }
         })
 
+    }
+
+    /**
+     * Adiciona user atual no cache pra quando abrir o app de novo nao precisar logar
+     */
+    private fun addCurrentPlayerToCache() {
+        val preferences: SharedPreferences = getSharedPreferences(
+            "PREFS",
+            0
+        )
+        val editor = preferences.edit()
+        editor.putString("user", user) // seta o valor user
+        editor.apply() // adicionou o user na cache, qnd logar de novo ele vai estar lá
+    }
+
+    /**
+     * pega o ultimo user logado no device
+     */
+    private fun getPlayerNameFromCache(): String {
+        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
+        return preferences.getString("user", "").toString()
     }
 }

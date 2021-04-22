@@ -34,8 +34,13 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+//    dataBinding {
+//        enabled = true
+//    }
+    buildFeatures {
+        viewBinding true
+    }
 }
-
 dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:27.0.0')
