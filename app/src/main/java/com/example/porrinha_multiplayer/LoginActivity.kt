@@ -75,7 +75,7 @@ class LoginActivity : AppCompatActivity() {
                 // Failed to read value
                 button.setText("LOG IN")
                 button.isEnabled = true
-                Toast.makeText(applicationContext, "Error Logging in", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "Error Logging in", Toast.LENGTH_SHORT).show()
             }
         })
 

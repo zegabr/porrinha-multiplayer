@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.viewbinding.ViewBinding
 import com.example.porrinha_multiplayer.databinding.ActivityGameBinding
 import com.google.firebase.database.*
+import kotlin.random.Random
 
 class GameActivity : AppCompatActivity() {
     // TODO: criar logica do jogo aqui
@@ -20,10 +21,11 @@ class GameActivity : AppCompatActivity() {
     var playerName = ""
     var roomName = ""
     var role = ""
-    var message = ""
+    var sticks = 0
     lateinit var database : FirebaseDatabase
-    lateinit var messageRef : DatabaseReference
+    lateinit var playerRef : DatabaseReference
     lateinit var binding: ActivityGameBinding
+    lateinit var player : Player
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,18 +48,14 @@ class GameActivity : AppCompatActivity() {
                 role = "guest"
             }
         }
-        messageRef = database.getReference("rooms").child(roomName).child("message")
-        addRoomEventListener() // listen for incoming messages
+        playerRef = database!!.getReference("rooms").child(roomName).child("players").child(playerName)
+        addPlayerEventListener() // escuta mudancas no player
 
         button.setOnClickListener {
             // send message
-            message = playerName
-            messageRef.setValue(message)
+            playerRef.child("totalSticks").setValue(ServerValue.increment(1))
+            Toast.makeText(this@GameActivity,  sticks.toString(), Toast.LENGTH_SHORT).show() // TODO: ta printando 1,2,1,2,1,2,1?? ta criando uma activity em cima da outra aparentement. Resolver isso urgente
         }
-
-        message = playerName
-        messageRef.setValue(message)
-
     }
 
     private fun getPlayerNameFromCache(): String {
@@ -65,16 +63,20 @@ class GameActivity : AppCompatActivity() {
         return preferences.getString("playerName", "").toString()
     }
 
-    private fun addRoomEventListener() { // observa mudança na mensagem
-        messageRef.addValueEventListener(object : ValueEventListener {
+    private fun addPlayerEventListener() { // observa mudanca no player
+        playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // message recieved
-                Toast.makeText(applicationContext,  snapshot.value.toString(), Toast.LENGTH_SHORT).show()
+                val player =  snapshot.getValue(Player::class.java) // assim q pega classe, nao da pra pegar fora desse listener, nao consegui acessar o datasnapshot
+                if (player != null) {
+                    sticks = player.totalSticks!!
+//                    Toast.makeText(applicationContext,  player.toString(), Toast.LENGTH_SHORT).show()
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // error -> retry
-                messageRef.setValue(message)
+                playerRef.child("totalSticks").setValue(ServerValue.increment(1))
             }
         })
     }

@@ -22,9 +22,9 @@ class LobbyActivity : AppCompatActivity() {
     var roomName = ""
 
     lateinit var database : FirebaseDatabase
-    lateinit var playerInsideRoomRef : DatabaseReference
     lateinit var roomsRef : DatabaseReference
-    lateinit var playersRef : DatabaseReference
+    lateinit var playerRef : DatabaseReference
+    lateinit var roomRef : DatabaseReference
 
     lateinit var binding: ActivityLobbyBinding
 
@@ -41,64 +41,38 @@ class LobbyActivity : AppCompatActivity() {
         listView = binding.listView // TODO: trocar pra recycleview no futuro distante
         button = binding.buttonCreateRoom
 
-        // todas as rooms disponiveis
-        roomsList = mutableListOf<String>()
+        roomsList = mutableListOf<String>()// todas as rooms disponiveis
 
+        addButtonOnClickListener() // ativa o botao de criar sala
+        addListViewOnItemClickListener() // ativa a interacao com a lista
+        addRoomsEventListener() // atualiza a lista de salas
+    }
+
+    private fun addButtonOnClickListener() {
         button.setOnClickListener(View.OnClickListener {
             button.setText("CREATING ROOM")
             button.isEnabled = false
 
-            // create room and add current user as player2
+            // cria sala e adiciona o user como um player novo
             roomName = playerName
-            playersRef = database.getReference("rooms").child(roomName).child("players")
-            playerInsideRoomRef = playersRef.child(playerName)
+            roomRef = database.getReference("rooms").child(roomName)
+            playerRef = roomRef.child("players").child(playerName)
             addRoomEventListener()
-            // TODO: trocar por um objeto Player (com as coisas necessariasa para um player no jogo)
-            playerInsideRoomRef.setValue("oi sou o host pq a sala tem meu nome") // rooms/{roomName}/players/player1 = {playerName}
+            playerRef.setValue(Player(playerName, 0, 3, false, true)) // adiciona o player na sala como host
         })
+    }
 
+    private fun addListViewOnItemClickListener() {
         listView.setOnItemClickListener(AdapterView.OnItemClickListener { parent, view, position, id ->
             // join a room
             roomName = roomsList[position]
-            playersRef = database.getReference("rooms").child(roomName).child("players")
-            playerInsideRoomRef = playersRef.child(playerName) // TODO: dar um jeito de pegar a referencia pra Player a partir dessa ref
+            playerRef = database.getReference("rooms").child(roomName).child("players").child(playerName)
+            addRoomEventListener() // escuta updates na sala
 
-            addRoomEventListener()
-
-            if(playerName.equals(roomName)){ // TODO: atualizar algo do Player aqui, pra triggar o addRoomEventListener
-                playerInsideRoomRef.setValue("oi sou o host pq a sala tem meu nome")
+            if(playerName.equals(roomName)){ // TODO: remover esse if, deixar só o setvalue, e salvar a room no cache (da msma forma q o login é salvo)
+                playerRef.setValue(Player(playerName, 0, 3, false, true))
             }else{
-                playerInsideRoomRef.setValue("oi sou um guest pq a sala nao tem meu nome") //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
-            }
-        })
-
-        // show if new rooms are available
-        addRoomsEventListener()
-    }
-
-    private fun getPlayerNameFromCache(): String {
-        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
-        return preferences.getString("playerName", "").toString()
-    }
-
-    private fun addRoomEventListener() {
-        playerInsideRoomRef.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // join room
-                button.setText("CREATE ROOM")
-                button.isEnabled = true
-
-                val intent = Intent(this@LobbyActivity, GameActivity::class.java)
-                intent.putExtra("roomName", roomName)
-                startActivity(intent)
-                finish() // encerra activity atual
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // error
-                button.setText("CREATE ROOM")
-                button.isEnabled = true
-                Toast.makeText(applicationContext, "Error", Toast.LENGTH_SHORT).show()
+                playerRef.setValue(Player(playerName, 0, 3, false, false)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
             }
         })
     }
@@ -121,5 +95,38 @@ class LobbyActivity : AppCompatActivity() {
                 TODO("Not yet implemented")
             }
         })
+    }
+
+    private fun getPlayerNameFromCache(): String { // TODO: pegar objeto inteiro do User?
+        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
+        return preferences.getString("playerName", "").toString()
+    }
+
+    private fun addRoomEventListener() {
+        playerRef.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // join room
+                enableCreateButton()
+                goToGameScreen()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // error
+                enableCreateButton()
+                Toast.makeText(this@LobbyActivity, "Error", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun enableCreateButton() {
+        button.setText("CREATE ROOM")
+        button.isEnabled = true
+    }
+
+    private fun goToGameScreen() {
+        val intent = Intent(this@LobbyActivity, GameActivity::class.java)
+        intent.putExtra("roomName", roomName)
+        startActivity(intent)
+        finish() // encerra activity atual
     }
 }
