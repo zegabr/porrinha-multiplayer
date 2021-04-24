@@ -6,9 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import com.example.porrinha_multiplayer.databinding.ActivityGameBinding
 import com.example.porrinha_multiplayer.databinding.ActivityLobbyBinding
-import com.example.porrinha_multiplayer.databinding.ActivityLoginBinding
+import com.example.porrinha_multiplayer.model.Player
 import com.google.firebase.database.*
 
 class LobbyActivity : AppCompatActivity() {

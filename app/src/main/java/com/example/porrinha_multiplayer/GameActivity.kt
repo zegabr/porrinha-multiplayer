@@ -1,16 +1,13 @@
 package com.example.porrinha_multiplayer
 
-import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import androidx.viewbinding.ViewBinding
 import com.example.porrinha_multiplayer.databinding.ActivityGameBinding
+import com.example.porrinha_multiplayer.model.Player
 import com.google.firebase.database.*
-import kotlin.random.Random
 
 class GameActivity : AppCompatActivity() {
     // TODO: criar logica do jogo aqui
