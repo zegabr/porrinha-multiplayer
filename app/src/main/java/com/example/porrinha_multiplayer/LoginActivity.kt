@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
         username = getPlayerNameFromCache() // TODO: pegar o objeto User salvo no preferences (memoria do celular)
         if (!username.equals("")){ // TODO: mudar esse check pra null qnd trocar username por User
             // pega referencia do user no database
-            LoginViewModel.setupUserReference("users/$username")
+            LoginViewModel.setupUserReference(username)
             addUserRefEventListener(LoginViewModel.userReference)
             LoginViewModel.setUserReferenceValue("")
         }
@@ -52,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
                 button.isEnabled = false
 
                 // TODO: dar um jeito de checar credenciais aqui (ou refazer essa classe toda, dependendo de como funcionar de vdd o login do firebase)
-                LoginViewModel.setupUserReference("users/$username")
+                LoginViewModel.setupUserReference(username)
                 addUserRefEventListener(LoginViewModel.userReference)
                 LoginViewModel.setUserReferenceValue("") // TODO: aparentemente isso trigga o login tbm, msm se o value ja for ""
             }

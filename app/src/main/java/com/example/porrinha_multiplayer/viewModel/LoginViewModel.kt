@@ -6,8 +6,8 @@ import com.google.firebase.database.DatabaseReference
 object LoginViewModel {
     lateinit var userReference: DatabaseReference
 
-    fun setupUserReference(url: String) {
-        userReference = FirebaseRepository.getReference(url)
+    fun setupUserReference(username: String) {
+        userReference = FirebaseRepository.getReference("users/$username")
     }
 
     fun setUserReferenceValue(value: String) { // TODO: trocar pra User

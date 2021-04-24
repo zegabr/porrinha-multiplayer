@@ -52,8 +52,8 @@ class LobbyActivity : AppCompatActivity() {
 
             // cria sala e adiciona o user como um player novo
             roomName = playerName
-            LobbyViewModel.setRoomReference("rooms/$roomName")
-            GameViewModel.setPlayerReference("rooms/$roomName/players/$playerName")
+            LobbyViewModel.setRoomReference(roomName)
+            GameViewModel.setPlayerReference(roomName, playerName)
             addRoomEventListener()
             GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, true)) // adiciona o player na sala como host
         })
@@ -63,7 +63,7 @@ class LobbyActivity : AppCompatActivity() {
         listView.setOnItemClickListener(AdapterView.OnItemClickListener { parent, view, position, id ->
             // join a room
             roomName = roomsList[position]
-            GameViewModel.setPlayerReference("rooms/$roomName/players/$playerName")
+            GameViewModel.setPlayerReference(roomName, playerName)
             addRoomEventListener() // escuta updates na sala
 
 
@@ -76,7 +76,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun addRoomsEventListener(){
-        LobbyViewModel.setRoomsReference("rooms")
+        LobbyViewModel.setRoomsReference()
         LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // show list of rooms

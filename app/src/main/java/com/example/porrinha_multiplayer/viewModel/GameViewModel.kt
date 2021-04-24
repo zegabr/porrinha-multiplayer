@@ -6,8 +6,8 @@ import com.google.firebase.database.DatabaseReference
 
 object GameViewModel {
     lateinit var playerRef : DatabaseReference
-    fun setPlayerReference(url: String) {
-        playerRef = FirebaseRepository.getReference(url)
+    fun setPlayerReference(roomName: String, playerName: String) {
+        playerRef = FirebaseRepository.getReference("rooms/$roomName/players/$playerName")
     }
 
     fun setPlayerReferenceValue(player: Player) {

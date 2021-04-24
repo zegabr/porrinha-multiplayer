@@ -40,13 +40,8 @@ class GameActivity : AppCompatActivity() {
         val extras = intent.extras
         if(extras != null){
             roomName = extras.getString("roomName").toString()
-//            if(roomName.equals(playerName)){// por enquanto esse role nao tá sendo usado pra nada
-//                role = "host"
-//            }else{
-//                role = "guest"
-//            }
         }
-        GameViewModel.setPlayerReference("rooms/$roomName/players/$playerName")
+        GameViewModel.setPlayerReference(roomName, playerName)
         addPlayerEventListener() // escuta mudancas no player
 
         button.setOnClickListener {

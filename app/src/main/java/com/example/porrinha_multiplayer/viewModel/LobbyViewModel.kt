@@ -4,12 +4,12 @@ import com.example.porrinha_multiplayer.repository.FirebaseRepository
 import com.google.firebase.database.DatabaseReference
 
 object LobbyViewModel {
-    fun setRoomReference(url: String) {
-        roomRef = FirebaseRepository.getReference(url)
+    fun setRoomReference(roomName: String) {
+        roomRef = FirebaseRepository.getReference("rooms/$roomName")
     }
 
-    fun setRoomsReference(url: String) {
-        roomsRef = FirebaseRepository.getReference(url)
+    fun setRoomsReference() {
+        roomsRef = FirebaseRepository.getReference("rooms")
     }
 
     lateinit var roomsRef : DatabaseReference
