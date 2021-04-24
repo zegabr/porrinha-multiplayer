@@ -17,8 +17,8 @@ import com.google.firebase.database.ValueEventListener
 
 class LoginActivity : AppCompatActivity() {
 
-    lateinit var binding : ActivityLoginBinding
-    lateinit var editText : EditText
+    lateinit var binding: ActivityLoginBinding
+    lateinit var editText: EditText
     lateinit var button: Button
 
     var username: String = "" // TODO: trocar pra uma classe User com localizacao, username e senha (dependendo de como for o auth do firebase), rank/pontuacao, etc
@@ -33,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
 
         // checks if user name exists and get reference
         username = getPlayerNameFromCache() // TODO: pegar o objeto User salvo no preferences (memoria do celular)
-        if (!username.equals("")){ // TODO: mudar esse check pra null qnd trocar username por User
+        if (!username.equals("")) { // TODO: mudar esse check pra null qnd trocar username por User
             // pega referencia do user no database
             LoginViewModel.setupUserReference(username)
             addUserRefEventListener(LoginViewModel.userReference)
@@ -66,6 +66,7 @@ class LoginActivity : AppCompatActivity() {
         userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!username.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
+                    // todo: essa logica tá estranha, realmente preciso modificar algo no database pra saber se o cara tá logado e mandar ele pra a proxima tela?
                     addCurrentPlayerToCache()
                     goToLobbyScreen() // chama a proxima tela
                 }
@@ -93,8 +94,8 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun addCurrentPlayerToCache() {
         val preferences: SharedPreferences = getSharedPreferences(
-            "PREFS",
-            0
+                "PREFS",
+                0
         )
         val editor = preferences.edit()
         editor.putString("playerName", username) // seta o valor user
@@ -105,7 +106,7 @@ class LoginActivity : AppCompatActivity() {
      * pega o ultimo user logado no device
      */
     private fun getPlayerNameFromCache(): String {
-        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("playerName", "").toString()
     }
 }

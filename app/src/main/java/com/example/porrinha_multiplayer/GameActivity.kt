@@ -24,7 +24,7 @@ class GameActivity : AppCompatActivity() {
     var sticks = 0
 
     lateinit var binding: ActivityGameBinding
-    lateinit var player : Player
+    lateinit var player: Player
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +38,7 @@ class GameActivity : AppCompatActivity() {
         playerName = getPlayerNameFromCache() // TODO: esse metodo aparece em todas as activities implementadas até agr
 
         val extras = intent.extras
-        if(extras != null){
+        if (extras != null) {
             roomName = extras.getString("roomName").toString()
         }
         GameViewModel.setPlayerReference(roomName, playerName)
@@ -51,7 +51,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getPlayerNameFromCache(): String {
-        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("playerName", "").toString()
     }
 
@@ -59,10 +59,10 @@ class GameActivity : AppCompatActivity() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // message recieved
-                val player =  snapshot.getValue(Player::class.java) // assim q pega classe, nao da pra pegar fora desse listener, nao consegui acessar o datasnapshot
+                val player = snapshot.getValue(Player::class.java) // assim q pega classe, nao da pra pegar fora desse listener, nao consegui acessar o datasnapshot
                 if (player != null) {
                     sticks = player.totalSticks!!
-                    Toast.makeText(this@GameActivity,  player.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@GameActivity, player.toString(), Toast.LENGTH_SHORT).show()
                 }
             }
 

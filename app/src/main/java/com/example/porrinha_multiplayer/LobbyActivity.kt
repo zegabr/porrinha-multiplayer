@@ -17,7 +17,7 @@ import com.google.firebase.database.ValueEventListener
 
 class LobbyActivity : AppCompatActivity() {
 
-    lateinit var listView : ListView
+    lateinit var listView: ListView
     lateinit var button: Button
 
     lateinit var roomsList: MutableList<String>
@@ -33,7 +33,11 @@ class LobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         playerName = getPlayerNameFromCache()
-        roomName = playerName
+        roomName = getCurrentRoomFromCache()
+        if (!roomName.equals("")) {
+            // vai direto pra o jogo
+            goToGameScreen()
+        }
 
         listView = binding.listView // TODO: trocar pra recycleview no futuro distante
         button = binding.buttonCreateRoom
@@ -65,17 +69,11 @@ class LobbyActivity : AppCompatActivity() {
             roomName = roomsList[position]
             GameViewModel.setPlayerReference(roomName, playerName)
             addRoomEventListener() // escuta updates na sala
-
-
-            if(playerName.equals(roomName)){ // TODO: remover esse if, deixar só o setvalue, e salvar a room no cache (da msma forma q o login é salvo)
-                GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, true))
-            }else{
-                GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, false)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
-            }
+            GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, false)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
         })
     }
 
-    private fun addRoomsEventListener(){
+    private fun addRoomsEventListener() {
         LobbyViewModel.setRoomsReference()
         LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -83,7 +81,7 @@ class LobbyActivity : AppCompatActivity() {
                 roomsList.clear()
                 val rooms = snapshot.children
 
-                for (room in rooms){
+                for (room in rooms) {
                     roomsList.add(room.key.toString()) // adiciona toda key de rooms/
                 }
                 listView.adapter = ArrayAdapter(this@LobbyActivity, R.layout.simple_list_item_1, roomsList) // atualiza o listview através desse adapter, mostrando as strings em roomsList
@@ -96,7 +94,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun addRoomEventListener() {
-        GameViewModel.playerRef.addValueEventListener(object : ValueEventListener{
+        GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // join room
                 enableCreateButton()
@@ -113,8 +111,26 @@ class LobbyActivity : AppCompatActivity() {
 
     // TODO: esse nao consegui deixar esse metodo acessivel por varias classes, ainda
     private fun getPlayerNameFromCache(): String { // TODO: pegar objeto inteiro do User?
-        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("playerName", "").toString()
+    }
+
+    /**
+     * Adiciona room atual no cache pra quando abrir o app de novo ja ir pra a tela de Game
+     */
+    private fun addCurrentRoomToCache() {
+        val preferences: SharedPreferences = getSharedPreferences(
+                "PREFS",
+                0
+        )
+        val editor = preferences.edit()
+        editor.putString("roomName", roomName) // seta o valor user
+        editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
+    }
+
+    private fun getCurrentRoomFromCache(): String {
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
+        return preferences.getString("roomName", "").toString()
     }
 
     private fun enableCreateButton() {
@@ -123,6 +139,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun goToGameScreen() {
+        addCurrentRoomToCache()
         val intent = Intent(this@LobbyActivity, GameActivity::class.java)
         intent.putExtra("roomName", roomName)
         startActivity(intent)
