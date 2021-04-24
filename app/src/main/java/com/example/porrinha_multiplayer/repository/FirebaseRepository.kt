@@ -1,5 +1,6 @@
 package com.example.porrinha_multiplayer.repository
 
+import com.example.porrinha_multiplayer.model.Player
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
@@ -13,6 +14,10 @@ object FirebaseRepository {
     }
 
     fun setValue(databaseReference: DatabaseReference, value:String) {
+        databaseReference.setValue(value)
+    }
+
+    fun setValue(databaseReference: DatabaseReference, value: Player) {
         databaseReference.setValue(value)
     }
 
