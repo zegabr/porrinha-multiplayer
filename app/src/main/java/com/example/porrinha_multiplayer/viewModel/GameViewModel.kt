@@ -13,5 +13,9 @@ object GameViewModel {
     fun setPlayerReferenceValue(player: Player) {
         FirebaseRepository.setValue(playerRef, player)
     }
+
+    fun setPlayerChildValue(url: String, i: Long) {
+        FirebaseRepository.incremenChildInteger(playerRef, url, i)
+    }
 }
 
