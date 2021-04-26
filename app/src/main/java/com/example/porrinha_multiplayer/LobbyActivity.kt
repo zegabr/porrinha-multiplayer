@@ -42,7 +42,7 @@ class LobbyActivity : AppCompatActivity() {
         listView = binding.listView // TODO: trocar pra recycleview no futuro distante
         button = binding.buttonCreateRoom
 
-        roomsList = mutableListOf<String>()// todas as rooms disponiveis
+        roomsList = mutableListOf()// todas as rooms disponiveis
 
         addCreateRoomButtonOnClickListener() // ativa o botao de criar sala
         addListViewOnItemClickListener() // ativa a interacao com itens da lista
@@ -57,20 +57,21 @@ class LobbyActivity : AppCompatActivity() {
             // cria sala e adiciona o user como um player novo
             roomName = playerName
             LobbyViewModel.setRoomReference(roomName)
+            LobbyViewModel.initRoom()
             GameViewModel.setPlayerReference(roomName, playerName)
             addRoomEventListener()
-            GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, true)) // adiciona o player na sala como host
+            GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, true, true)) // adiciona o player na sala como host
         })
     }
 
     private fun addListViewOnItemClickListener() {
-        listView.setOnItemClickListener(AdapterView.OnItemClickListener { parent, view, position, id ->
+        listView.setOnItemClickListener { parent, view, position, id ->
             // join a room
             roomName = roomsList[position]
             GameViewModel.setPlayerReference(roomName, playerName)
             addRoomEventListener() // escuta updates na sala
-            GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, false)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
-        })
+            GameViewModel.setPlayerReferenceValue(Player(playerName, 0, 3, false, false, true)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
+        }
     }
 
     private fun addRoomsEventListener() {
@@ -88,7 +89,7 @@ class LobbyActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Toast.makeText(this@LobbyActivity, "Error reading list of rooms", Toast.LENGTH_SHORT).show()
             }
         })
     }

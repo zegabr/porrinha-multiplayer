@@ -22,8 +22,12 @@ object FirebaseRepository {
         databaseReference.setValue(value)
     }
 
-    fun incremenChildInteger(databaseReference: DatabaseReference, childUrl: String, i: Long) {
-        databaseReference.child(childUrl).setValue(ServerValue.increment(i))
+    fun setValue(databaseReference: DatabaseReference, b: Boolean) {
+        databaseReference.setValue(b)
+    }
+
+    fun setValue(databaseReference: DatabaseReference, i: Int) {
+        databaseReference.setValue(i)
     }
 
 }

@@ -12,6 +12,12 @@ object LobbyViewModel {
         roomsRef = FirebaseRepository.getReference("rooms")
     }
 
+    fun initRoom() {
+        FirebaseRepository.setValue(roomRef.child("maxRounds"), 2)
+        FirebaseRepository.setValue(roomRef.child("lastRoundSticks"), -1)
+        FirebaseRepository.setValue(roomRef.child("currentRound"), 1)
+    }
+
     lateinit var roomsRef : DatabaseReference
     lateinit var roomRef : DatabaseReference
 
