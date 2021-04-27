@@ -8,18 +8,20 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.porrinha_multiplayer.databinding.ActivityLoginBinding
-import com.google.firebase.database.*
+import com.example.porrinha_multiplayer.viewModel.LoginViewModel
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 
 
 class LoginActivity : AppCompatActivity() {
 
-    lateinit var binding : ActivityLoginBinding
-    lateinit var editText : EditText
+    lateinit var binding: ActivityLoginBinding
+    lateinit var editText: EditText
     lateinit var button: Button
 
-    var user: String = "" // TODO: trocar pra uma classe com localizacao, username e senha, rank, etc
-    lateinit var database : FirebaseDatabase
-    lateinit var userRef : DatabaseReference
+    var username: String = "" // TODO: trocar pra uma classe User com localizacao, username e senha (dependendo de como for o auth do firebase), rank/pontuacao, etc
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,62 +30,63 @@ class LoginActivity : AppCompatActivity() {
 
         editText = binding.editTextLogin
         button = binding.buttonLogin
-        database = FirebaseDatabase.getInstance()
 
         // checks if user name exists and get reference
-        user = getPlayerNameFromCache()
-        if (!user.equals("")){ // TODO: mudar esse check pra null qnd trocar pleyer por um objeto
+        username = getPlayerNameFromCache() // TODO: pegar o objeto User salvo no preferences (memoria do celular)
+        if (!username.equals("")) { // TODO: mudar esse check pra null qnd trocar username por User
             // pega referencia do user no database
-            userRef = database.getReference("users").child(user)
-            addEventListener()
-            userRef.setValue("") // TODO: passar o novo objeto aqui caso nao tenha nada em userRef
-            // TODO: pra o eventListener ser triggado e ele mudar de activity, vai precisar mudar algo no objeto dessa ref. Aparentemente colocar msma coisa que ja existe nao serve
-            // TODO: sugestao: colocar no objeto uma variavel lastLoginTime e dar update antes desse setValue(user), isso vai trigar a mudanca de activity
+            LoginViewModel.setupUserReference(username)
+            addUserRefEventListener(LoginViewModel.userReference)
+            LoginViewModel.setUserReferenceValue("")
         }
 
-        /**
-         * Logging the user in
-         */
+        addLoginButtonClickListener()
+    }
+
+    private fun addLoginButtonClickListener() {
         button.setOnClickListener {
-            user = editText.text.toString()
+            username = editText.text.toString()
             editText.text.clear()
-            if (!user.equals("")) {
+            if (!username.equals("")) {
                 button.setText("LOGGING IN")
                 button.isEnabled = false
 
-                userRef = database.getReference("users").child(user) // pega referencia do user no database (users/{username})
-                addEventListener()
-                userRef.setValue("") // TODO: ver o todo no setValue de cima
+                // TODO: dar um jeito de checar credenciais aqui (ou refazer essa classe toda, dependendo de como funcionar de vdd o login do firebase)
+                LoginViewModel.setupUserReference(username)
+                addUserRefEventListener(LoginViewModel.userReference)
+                LoginViewModel.setUserReferenceValue("") // TODO: aparentemente isso trigga o login tbm, msm se o value ja for ""
             }
         }
     }
 
     /**
-     * Adiciona um listener que checa se a referencia pra o user atual foi modificada
+     * Adiciona um listener que checa se a o user atual foi modificado no database
      */
-    private fun addEventListener() {
-        // read from database
-        userRef.addValueEventListener(object : ValueEventListener {
+    private fun addUserRefEventListener(userReference: DatabaseReference) {
+        userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!user.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
-
+                if (!username.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
+                    // todo: essa logica tá estranha, realmente preciso modificar algo no database pra saber se o cara tá logado e mandar ele pra a proxima tela?
                     addCurrentPlayerToCache()
-
-                    // chama a proxima tela
-                    startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
-                    // encerra activity atual
-                    finish()
+                    goToLobbyScreen() // chama a proxima tela
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
                 button.setText("LOG IN")
                 button.isEnabled = true
-                Toast.makeText(applicationContext, "Error Logging in", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "Error Logging in", Toast.LENGTH_SHORT).show()
             }
         })
 
+    }
+
+    /**
+     * Vai pra o lobby
+     */
+    private fun goToLobbyScreen() {
+        startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
+        finish()// encerra activity atual
     }
 
     /**
@@ -91,19 +94,19 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun addCurrentPlayerToCache() {
         val preferences: SharedPreferences = getSharedPreferences(
-            "PREFS",
-            0
+                "PREFS",
+                0
         )
         val editor = preferences.edit()
-        editor.putString("user", user) // seta o valor user
-        editor.apply() // adicionou o user na cache, qnd logar de novo ele vai estar lá
+        editor.putString("playerName", username) // seta o valor user
+        editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
     }
 
     /**
      * pega o ultimo user logado no device
      */
     private fun getPlayerNameFromCache(): String {
-        val preferences : SharedPreferences = getSharedPreferences("PREFS", 0)
-        return preferences.getString("user", "").toString()
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
+        return preferences.getString("playerName", "").toString()
     }
 }

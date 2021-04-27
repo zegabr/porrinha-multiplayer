@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Porrinha-multiplayer</string>
+    <string name="play">Play</string>
+    <string name="your_sticks">Your Sticks</string>
+    <string name="sticks_on_last_round">Sticks on last round</string>
+    <string name="total_sticks">Total Sticks</string>
+    <string name="round">Round:</string>
+    <string name="game">Game</string>
+    <string name="room">Room:</string>
 </resources>
