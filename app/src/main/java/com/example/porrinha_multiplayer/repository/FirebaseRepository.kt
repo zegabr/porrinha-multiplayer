@@ -1,6 +1,8 @@
 package com.example.porrinha_multiplayer.repository
 
+import android.location.Location
 import com.example.porrinha_multiplayer.model.Player
+import com.example.porrinha_multiplayer.model.User
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
@@ -14,7 +16,15 @@ object FirebaseRepository {
         return database.getReference(url)
     }
 
-    fun setValue(databaseReference: DatabaseReference, value:String) {
+    fun setValue(databaseReference: DatabaseReference, value: String) {
+        databaseReference.setValue(value)
+    }
+
+    fun setValue(databaseReference: DatabaseReference, value: Location) {
+        databaseReference.setValue(value)
+    }
+
+    fun setValue(databaseReference: DatabaseReference, value: Double) {
         databaseReference.setValue(value)
     }
 
@@ -28,6 +38,14 @@ object FirebaseRepository {
 
     fun setValue(databaseReference: DatabaseReference, i: Int) {
         databaseReference.setValue(i)
+    }
+
+    fun setValue(databaseReference: DatabaseReference, value: User) {
+        databaseReference.setValue(value)
+    }
+
+    fun getReference(): DatabaseReference {
+        return database.getReference()
     }
 
 }
