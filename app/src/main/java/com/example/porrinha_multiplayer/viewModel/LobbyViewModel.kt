@@ -8,11 +8,17 @@ object LobbyViewModel {
         roomRef = FirebaseRepository.getReference("rooms/$roomName")
     }
 
+    fun setRootReference(){
+        rootRef = FirebaseRepository.getReference()
+    }
+
     fun setRoomsReference() {
         roomsRef = FirebaseRepository.getReference("rooms")
     }
 
-    fun initRoom() {
+    fun initRoom(latitude: Double, longitude: Double) {
+        FirebaseRepository.setValue(roomRef.child("latitude"), latitude)
+        FirebaseRepository.setValue(roomRef.child("longitude"), longitude)
         FirebaseRepository.setValue(roomRef.child("maxRounds"), 2)
         FirebaseRepository.setValue(roomRef.child("lastRoundSticks"), -1)
         FirebaseRepository.setValue(roomRef.child("currentRound"), 1)
@@ -20,6 +26,6 @@ object LobbyViewModel {
 
     lateinit var roomsRef : DatabaseReference
     lateinit var roomRef : DatabaseReference
-
+    lateinit var rootRef : DatabaseReference
 
 }
