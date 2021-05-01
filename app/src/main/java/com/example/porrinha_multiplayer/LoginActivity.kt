@@ -34,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
     lateinit var user: User
     lateinit var location: Location
 
-    var username: String = "" // TODO: trocar pra uma classe User com localizacao, username e senha (dependendo de como for o auth do firebase), rank/pontuacao, etc
+    var username: String = ""
 
     fun verifyPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
@@ -60,8 +60,8 @@ class LoginActivity : AppCompatActivity() {
                 }
 
         // checks if user name exists and get reference
-        user = getPlayerFromCache() // TODO: pegar o objeto User salvo no preferences (memoria do celular)
-        if (!user.username.equals("")) { // TODO: mudar esse check pra null qnd trocar username por User
+        user = getPlayerFromCache()
+        if (!user.username.equals("")) {
             // pega referencia do user no database
             LoginViewModel.setupUserReference(username)
             addUserRefEventListener(LoginViewModel.userReference)
@@ -79,7 +79,6 @@ class LoginActivity : AppCompatActivity() {
                 button.setText("LOGGING IN")
                 button.isEnabled = false
 
-                // TODO: dar um jeito de checar credenciais aqui (ou refazer essa classe toda, dependendo de como funcionar de vdd o login do firebase)
                 LoginViewModel.setupUserReference(username)
                 addUserRefEventListener(LoginViewModel.userReference)
                 LoginViewModel.setUserReferenceValue(User(username,location.latitude, location.longitude)) // TODO: aparentemente isso trigga o login tbm, msm se o value ja for ""
