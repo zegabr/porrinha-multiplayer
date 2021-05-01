@@ -160,7 +160,5 @@ object GameViewModel {
     fun setProcessing() {
         FirebaseRepository.setValue(roomRef.child("processing"), true)
     }
-
-
 }
 
