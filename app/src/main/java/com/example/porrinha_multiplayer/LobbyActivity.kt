@@ -1,30 +1,30 @@
 package com.example.porrinha_multiplayer
 
-import android.R
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.porrinha_multiplayer.databinding.ActivityLobbyBinding
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
+import com.example.porrinha_multiplayer.viewHolder.RoomsAdapter
 import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.example.porrinha_multiplayer.viewModel.LobbyViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.getValue
 
 class LobbyActivity : AppCompatActivity() {
 
-    lateinit var listView: ListView
+    lateinit var recyclerViewRooms: RecyclerView
     lateinit var button: Button
 
-    lateinit var roomsList: MutableList<String>
+    lateinit var roomsList: MutableList<Room>
 
     var user: User = User("",0.0,0.0)
     var roomName = ""
@@ -43,13 +43,12 @@ class LobbyActivity : AppCompatActivity() {
             goToGameScreen()
         }
 
-        listView = binding.listView // TODO: trocar pra recycleview no futuro distante
+        recyclerViewRooms = binding.roomsListRecycler
         button = binding.buttonCreateRoom
 
         roomsList = mutableListOf()// todas as rooms disponiveis
 
         addCreateRoomButtonOnClickListener() // ativa o botao de criar sala
-        addListViewOnItemClickListener() // ativa a interacao com itens da lista
         addRoomsEventListener() // ativa atualizaca da lista de salas
     }
 
@@ -61,21 +60,11 @@ class LobbyActivity : AppCompatActivity() {
             // cria sala e adiciona o user como um player novo
             roomName = user.username!!
             LobbyViewModel.setRoomReference(roomName)
-            LobbyViewModel.initRoom(user.latitude!!, user.longitude!!)
+            LobbyViewModel.initRoom(user.latitude!!, user.longitude!!, user.username!!)
             GameViewModel.setPlayerReference(roomName, user.username!!)
             addRoomEventListener()
             GameViewModel.setPlayerReferenceValue(Player(user.username, 0, 3, false, true, true)) // adiciona o player na sala como host
         })
-    }
-
-    private fun addListViewOnItemClickListener() {
-        listView.setOnItemClickListener { parent, view, position, id ->
-            // join a room
-            roomName = roomsList[position]
-            GameViewModel.setPlayerReference(roomName, user.username!!)
-            addRoomEventListener() // escuta updates na sala
-            GameViewModel.setPlayerReferenceValue(Player(user.username!!, 0, 3, false, false, true)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
-        }
     }
 
     private fun addRoomsEventListener() {
@@ -85,24 +74,17 @@ class LobbyActivity : AppCompatActivity() {
                 // show list of rooms
                 roomsList.clear()
                 val rooms = snapshot.children
+                val recyclerViewRooms = binding.roomsListRecycler
                 for (room in rooms.iterator()) {
                     var actualRoom = room.getValue(Room::class.java)
-                    roomsList.add(room.key.toString()) // adiciona toda key de rooms/
+                    if (actualRoom != null){
+                        roomsList.add(actualRoom) // adiciona todas as salas
+                    }
                 }
-                listView.adapter = ArrayAdapter(this@LobbyActivity, R.layout.simple_list_item_1, roomsList) // atualiza o listview através desse adapter, mostrando as strings em roomsList
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@LobbyActivity, "Error reading list of rooms", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun addRootEventListener() {
-        LobbyViewModel.setRootReference()
-        LobbyViewModel.rootRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
+                recyclerViewRooms.apply {
+                    layoutManager = LinearLayoutManager(this@LobbyActivity)
+                    adapter = RoomsAdapter(roomsList, user, layoutInflater)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -128,7 +110,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     // TODO: esse nao consegui deixar esse metodo acessivel por varias classes, ainda
-    private fun getPlayerFromCache(): User { // TODO: pegar objeto inteiro do User?
+    private fun getPlayerFromCache(): User {
         val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         var username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
