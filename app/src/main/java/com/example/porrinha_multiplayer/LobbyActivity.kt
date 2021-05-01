@@ -76,7 +76,7 @@ class LobbyActivity : AppCompatActivity() {
                 val recyclerViewRooms = binding.roomsListRecycler
                 for (room in rooms.iterator()) {
                     var actualRoom = room.getValue(Room::class.java)
-                    if (actualRoom != null){
+                    if (actualRoom != null && actualRoom.currentRound == 1){
                         roomsList.add(actualRoom) // adiciona todas as salas
                     }
                 }

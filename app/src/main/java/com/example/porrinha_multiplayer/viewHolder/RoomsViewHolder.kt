@@ -62,7 +62,7 @@ class RoomsViewHolder(private val binding: RoomBinding) :
         }
         roomLocation.latitude = room.latitude
         roomLocation.longitude = room.longitude
-        distance = location.distanceTo(roomLocation).toString() + " km"
+        distance = (Math.floor(location.distanceTo(roomLocation)/1000.0)).toString() + " km"
 
         binding.roomName.text = roomName
         binding.distance.text = distance
