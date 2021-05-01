@@ -1,10 +1,16 @@
 package com.example.porrinha_multiplayer
 
 import android.R
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.TextView
+import android.widget.Toast
 import com.example.porrinha_multiplayer.databinding.ActivityGameBinding
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
@@ -14,23 +20,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
 class GameActivity : AppCompatActivity() {
-    // TODO: criar logica do jogo aqui
-    // TODO: remover user da room através de um botao de sair
 
     lateinit var playButton: Button
     lateinit var exitButton: Button
     lateinit var roomNameTextView: TextView
     lateinit var roundTextView: TextView
     lateinit var playersListView: ListView
-    lateinit var totalSticksTextview: TextView
-    lateinit var lastRoundSticksTextView: TextView
-    lateinit var playerSticksTextView: TextView
-    lateinit var sticksToPlay: EditText
+    lateinit var totalSticksInRoomTextview: TextView
+    lateinit var lastRoundStickSumTextView: TextView
+    lateinit var playerTotalSticksTextView: TextView
+    lateinit var sticksToPlayEditText: EditText
+    lateinit var finalGuessEditText: EditText
 
     var playerName = ""
     var roomName = ""
-    var role = false
-    var sticks = 0
     lateinit var playersList: MutableList<String>
 
     lateinit var playerObject: Player
@@ -45,20 +48,21 @@ class GameActivity : AppCompatActivity() {
         roomNameTextView = binding.roomNameTextView
         roundTextView = binding.roundTextView
         playersListView = binding.playersListView
-        totalSticksTextview = binding.totalSticksTextview
-        lastRoundSticksTextView = binding.lastRoundSticksTextView
-        playerSticksTextView = binding.playerSticksTextView
-        sticksToPlay = binding.sticksToPlay
+        totalSticksInRoomTextview = binding.totalSticksTextview
+        lastRoundStickSumTextView = binding.lastRoundSticksTextView
+        playerTotalSticksTextView = binding.playerSticksTextView
+        sticksToPlayEditText = binding.sticksToPlay
+        finalGuessEditText = binding.finalGuessEditText
 
+        exitButton = binding.exitRoomButton
         playButton = binding.playButton
         playButton.isEnabled = true
 
         playersList = mutableListOf()
-        playerName = getPlayerNameFromCache() // TODO: esse metodo aparece em todas as activities implementadas até agr
+        playerName = getPlayerNameFromCache()
 
-        val extras = intent.extras
-        if (extras != null) {
-            roomName = extras.getString("roomName").toString()
+        roomName = getCurrentRoomFromCache()
+        if (!roomName.equals("")) {
             roomNameTextView.text = roomName
         }
         GameViewModel.setPlayerReference(roomName, playerName)
@@ -68,27 +72,56 @@ class GameActivity : AppCompatActivity() {
         GameViewModel.setPlayerIsOnline(true) // deve triggar os 2 eventlistener
 
         playButton.setOnClickListener {
-            if (sticksToPlay.text.isBlank()) {
-                Toast.makeText(applicationContext, "Must chose an integer", Toast.LENGTH_SHORT).show()
+            if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
+                Toast.makeText(
+                    applicationContext,
+                    "Must chose an integer for each field",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
-                sticks = sticksToPlay.text.toString().toInt()
-                if (sticks > playerObject.totalSticks!!) {
-                    Toast.makeText(applicationContext, "This is more than you have", Toast.LENGTH_SHORT).show()
-                } else if (sticks == 0) {
-                    Toast.makeText(applicationContext, "Quantity not allowed", Toast.LENGTH_SHORT).show()
+                var sticksToPlay = sticksToPlayEditText.text.toString().toInt()
+                var finalGuess = finalGuessEditText.text.toString().toInt()
+
+                if (sticksToPlay > playerObject.totalSticks!!) {
+                    Toast.makeText(
+                        applicationContext,
+                        "This is more than you have",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if (sticksToPlay <= 0 || finalGuess <= 0) {
+                    Toast.makeText(applicationContext, "Quantity not allowed", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     playerObject.played = true
-                    playerObject.selectedSticks = sticks
+                    playerObject.selectedSticks = sticksToPlay
+                    playerObject.finalGuess = finalGuess
+
+                    sticksToPlayEditText.isEnabled = false
+                    sticksToPlayEditText.isClickable = false
+                    sticksToPlayEditText.isFocusable = false
+
+                    finalGuessEditText.isEnabled = false
+                    finalGuessEditText.isClickable = false
+                    finalGuessEditText.isFocusable = false
+
                     playButton.isEnabled = false
+                    playButton.text = "Waiting..."
+
                     GameViewModel.setPlayerReferenceValue(playerObject)
                 }
             }
+        }
+
+        exitButton.setOnClickListener {
+            GameViewModel.removePlayerFromRoom()
+            goToLobbyScreen()
         }
     }
 
     private fun addPlayersListEventListener() {
         GameViewModel.playersRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.hasChild(playerName)) return // evita fazer outrsa coisas se o player ja saiu da sala
                 // show list of rooms
                 playersList.clear()
                 val players = snapshot.children
@@ -96,11 +129,16 @@ class GameActivity : AppCompatActivity() {
                 for (player in players) {
                     playersList.add(player.key.toString())
                 }
-                playersListView.adapter = ArrayAdapter(this@GameActivity, R.layout.simple_list_item_1, playersList)
+                playersListView.adapter =
+                    ArrayAdapter(this@GameActivity, R.layout.simple_list_item_1, playersList)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@GameActivity, "Error reading list of players", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@GameActivity,
+                    "Error reading list of players",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -108,44 +146,112 @@ class GameActivity : AppCompatActivity() {
     private fun addRoomEventListener() {
         GameViewModel.roomRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists() || !snapshot.hasChild("players/$playerName")) return
+
                 room = snapshot.getValue(Room::class.java)!!
+                var players = room.players
+
+                if (players != null) {
+                    if (GameViewModel.isHost && players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
+                        room = GameViewModel.processGameState(room)
+                        GameViewModel.updateRoom(room)
+                    } else if (!GameViewModel.isHost) {
+                        if (!GameViewModel.hasHost(players)) {
+                            players = GameViewModel.setFirstPlayerAsHost(players, playerName)
+                            room.players = players
+                            GameViewModel.updateRoom(room)
+                        }
+                    }
+
+                    if (players != null) {
+                        if (GameViewModel.playerWon(room, players)) {
+                            goToWinnerScreen()
+                            GameViewModel.finnishRoom()
+                        }
+                        playerObject = players.get(playerName)!!
+                        if (playerObject.played == false) {
+                            sticksToPlayEditText.isEnabled = true
+                            sticksToPlayEditText.isClickable = true
+                            sticksToPlayEditText.isFocusable = true
+                            finalGuessEditText.isEnabled = true
+                            finalGuessEditText.isClickable = true
+                            finalGuessEditText.isFocusable = true
+                            playButton.text = "Play"
+                        }
+                    }
+                }
+
                 updateRoomValuesOnScreen(room)
-
-                // TODO: if host and everyone has played, then try processing game
-
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(applicationContext, "Error reading room values", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Error reading room values", Toast.LENGTH_SHORT)
+                    .show()
             }
         })
     }
 
-    private fun addPlayerEventListener() { // observa mudanca no player
+    private fun addPlayerEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                playerObject = snapshot.getValue(Player::class.java)!! // assim q pega classe, nao da pra pegar fora desse listener, nao consegui acessar o datasnapshot
-                playerSticksTextView.text = playerObject.totalSticks.toString()
-                playButton.isEnabled = playerObject.played == false // só pode play se nao tiver played
+                if (!snapshot.exists()) return
+                playerObject = snapshot.getValue(Player::class.java)!!
+                playerTotalSticksTextView.text = playerObject.totalSticks.toString()
+                playButton.isEnabled =
+                    playerObject.played == false // só pode apertar play se nao tiver jogado, o played vai ser atualizado no processamento do jogo
+                GameViewModel.isHost = playerObject.host == true
 
+                if (playerObject.totalSticks == 0) { // Player perdeu
+                    goToLooserScreen()
+                    GameViewModel.removePlayerFromRoom()
+                }
             }
 
-            override fun onCancelled(error: DatabaseError) {
-
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+    private fun goToLooserScreen() {
+        removeCurrentRoomFromCache()
+        startActivity(Intent(this@GameActivity, LooserActivity::class.java))
+        finish()
+    }
+
+    private fun goToWinnerScreen() {
+        removeCurrentRoomFromCache()
+        startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
+        finish()
+    }
+
+    private fun goToLobbyScreen() {
+        removeCurrentRoomFromCache()
+        startActivity(Intent(this@GameActivity, LobbyActivity::class.java))
+        finish()
     }
 
     private fun updateRoomValuesOnScreen(room: Room) {
         roundTextView.text = room.currentRound.toString() + "/" + room.maxRounds.toString()
-        totalSticksTextview.text = GameViewModel.getTotalSticks(room.players).toString()
-        lastRoundSticksTextView.text = room.lastRoundSticks.toString()
-
-
+        totalSticksInRoomTextview.text = GameViewModel.getTotalSticks(room.players).toString()
+        lastRoundStickSumTextView.text = room.lastRoundSticks.toString()
     }
 
     private fun getPlayerNameFromCache(): String {
         val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("playerName", "").toString()
+    }
+
+    private fun getCurrentRoomFromCache(): String {
+        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
+        return preferences.getString("roomName", "").toString()
+    }
+
+    private fun removeCurrentRoomFromCache() {
+        val preferences: SharedPreferences = getSharedPreferences(
+            "PREFS",
+            0
+        )
+        val editor = preferences.edit()
+        editor.putString("roomName", "")
+        editor.apply()
     }
 }

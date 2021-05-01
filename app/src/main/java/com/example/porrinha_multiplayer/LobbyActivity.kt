@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import com.example.porrinha_multiplayer.databinding.ActivityLobbyBinding
@@ -17,7 +16,6 @@ import com.example.porrinha_multiplayer.viewModel.LobbyViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.getValue
 
 class LobbyActivity : AppCompatActivity() {
 
@@ -39,7 +37,6 @@ class LobbyActivity : AppCompatActivity() {
         user = getPlayerFromCache()
         roomName = getCurrentRoomFromCache()
         if (!roomName.equals("")) {
-            // vai direto pra o jogo
             goToGameScreen()
         }
 
@@ -64,7 +61,7 @@ class LobbyActivity : AppCompatActivity() {
             LobbyViewModel.initRoom(user.latitude!!, user.longitude!!)
             GameViewModel.setPlayerReference(roomName, user.username!!)
             addRoomEventListener()
-            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, 3, false, true, true)) // adiciona o player na sala como host
+            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
         })
     }
 
@@ -74,7 +71,7 @@ class LobbyActivity : AppCompatActivity() {
             roomName = roomsList[position]
             GameViewModel.setPlayerReference(roomName, user.username!!)
             addRoomEventListener() // escuta updates na sala
-            GameViewModel.setPlayerReferenceValue(Player(user.username!!, 0, 3, false, false, true)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
+            GameViewModel.setPlayerReferenceValue(Player(user.username!!, 0, -1, 3,false, false, true)) //rooms/{roomName}/players/playerName = {objeto qqr} ==> ISSO TRIGGA O addRoomEventListener.onDataChange
         }
     }
 
@@ -98,22 +95,10 @@ class LobbyActivity : AppCompatActivity() {
         })
     }
 
-    private fun addRootEventListener() {
-        LobbyViewModel.setRootReference()
-        LobbyViewModel.rootRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@LobbyActivity, "Error reading list of rooms", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
     private fun addRoomEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if(!snapshot.exists()) return
                 // join room
                 enableCreateButton()
                 goToGameScreen()
@@ -127,8 +112,8 @@ class LobbyActivity : AppCompatActivity() {
         })
     }
 
-    // TODO: esse nao consegui deixar esse metodo acessivel por varias classes, ainda
-    private fun getPlayerFromCache(): User { // TODO: pegar objeto inteiro do User?
+
+    private fun getPlayerFromCache(): User {
         val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         var username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
