@@ -1,6 +1,7 @@
 package com.example.porrinha_multiplayer
 
 import android.content.Intent
+import android.R
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -171,7 +172,7 @@ class GameActivity : AppCompatActivity() {
                     }
 
                     if (players != null) {
-                        if (GameViewModel.playerWon(room, players)) {
+                        if (GameViewModel.playerWon(room)) {
                             goToWinnerScreen()
                             GameViewModel.finnishRoom()
                         }
@@ -206,6 +207,11 @@ class GameActivity : AppCompatActivity() {
                 playerTotalSticksTextView.text = playerObject.totalSticks.toString()
                 playButton.isEnabled =
                     playerObject.played == false // só pode apertar play se nao tiver jogado, o played vai ser atualizado no processamento do jogo
+                if(playButton.isEnabled == false){
+                    playButton.text = "Waiting..."
+                }else{
+                    playButton.text = "Play"
+                }
                 GameViewModel.isHost = playerObject.host == true
 
                 if(GameViewModel.wonLastRound == 1){

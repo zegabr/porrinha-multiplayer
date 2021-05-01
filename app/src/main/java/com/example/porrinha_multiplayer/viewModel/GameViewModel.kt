@@ -133,10 +133,19 @@ object GameViewModel {
         return players
     }
 
-    fun playerWon(room: Room, players: Map<String, Player>): Boolean {
-        return room.currentRound!! > room.maxRounds!! // acabou as rodadas
-                || (players.size == 1 && room.currentRound != 1) // só existe 1 player e já passou da 1a rodada
+    fun playerWon(room: Room): Boolean {
+        var players = room.players
+        if (players != null) {
+            return room.currentRound!! > room.maxRounds!! // acabou as rodadas
+                    || (players.size == 1 && room.currentRound != 1)
+        } // só existe 1 player e já passou da 1a rodada
+        return false
     }
+
+    fun updateMaxRounds(newMaxRounds: Int) {
+        FirebaseRepository.setValue(roomRef.child("maxRounds"), newMaxRounds)
+    }
+
 
 
 }

@@ -17,7 +17,7 @@ object LobbyViewModel {
         FirebaseRepository.setValue(roomRef.child("longitude"), longitude)
         FirebaseRepository.setValue(roomRef.child("name"), name)
         FirebaseRepository.setValue(roomRef.child("maxPlayers"), maxPlayers)
-        FirebaseRepository.setValue(roomRef.child("maxRounds"), 2)
+        FirebaseRepository.setValue(roomRef.child("maxRounds"), 3)
         FirebaseRepository.setValue(roomRef.child("lastRoundSticks"), -1)
         FirebaseRepository.setValue(roomRef.child("currentRound"), 1)
     }
