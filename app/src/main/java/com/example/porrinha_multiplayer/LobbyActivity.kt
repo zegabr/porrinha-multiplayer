@@ -23,7 +23,7 @@ class LobbyActivity : AppCompatActivity() {
 
     lateinit var recyclerViewRooms: RecyclerView
     lateinit var button: Button
-
+    lateinit var preferences: SharedPreferences
     lateinit var roomsList: MutableList<Room>
 
     var user: User = User("",0.0,0.0)
@@ -35,7 +35,7 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        preferences = getSharedPreferences("PREFS", 0)
         user = getPlayerFromCache()
         roomName = getCurrentRoomFromCache()
         if (!roomName.equals("")) {
@@ -82,7 +82,7 @@ class LobbyActivity : AppCompatActivity() {
                 }
                 recyclerViewRooms.apply {
                     layoutManager = LinearLayoutManager(this@LobbyActivity)
-                    adapter = RoomsAdapter(roomsList, user, layoutInflater)
+                    adapter = RoomsAdapter(roomsList, user, preferences, layoutInflater)
                 }
             }
 
@@ -111,7 +111,6 @@ class LobbyActivity : AppCompatActivity() {
 
 
     private fun getPlayerFromCache(): User {
-        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         var username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
@@ -123,17 +122,12 @@ class LobbyActivity : AppCompatActivity() {
      * Adiciona room atual no cache pra quando abrir o app de novo ja ir pra a tela de Game
      */
     private fun addCurrentRoomToCache() {
-        val preferences: SharedPreferences = getSharedPreferences(
-                "PREFS",
-                0
-        )
         val editor = preferences.edit()
         editor.putString("roomName", roomName) // seta o valor user
         editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
     }
 
     private fun getCurrentRoomFromCache(): String {
-        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("roomName", "").toString()
     }
 
