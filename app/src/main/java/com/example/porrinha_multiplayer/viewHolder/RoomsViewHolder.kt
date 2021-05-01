@@ -35,7 +35,7 @@ class RoomsViewHolder(private val binding: RoomBinding) :
 
     fun setReferences() { //Atualizando as referências para passar a informação de entrada na sala para o firebase
         GameViewModel.setPlayerReference(roomName, actualUser.username!!)
-        GameViewModel.setPlayerReferenceValue(Player(actualUser.username!!, 0, 3, false, false, true)) //rooms/{roomName}/players/playerName
+        GameViewModel.setPlayerReferenceValue(Player(actualUser.username!!, 0, -1,3, false, false, true)) //rooms/{roomName}/players/playerName
     }
 
     fun bindTo(room : Room, location: Location) {

@@ -8,10 +8,6 @@ object LobbyViewModel {
         roomRef = FirebaseRepository.getReference("rooms/$roomName")
     }
 
-    fun setRootReference(){
-        rootRef = FirebaseRepository.getReference()
-    }
-
     fun setRoomsReference() {
         roomsRef = FirebaseRepository.getReference("rooms")
     }
@@ -27,6 +23,4 @@ object LobbyViewModel {
 
     lateinit var roomsRef : DatabaseReference
     lateinit var roomRef : DatabaseReference
-    lateinit var rootRef : DatabaseReference
-
 }

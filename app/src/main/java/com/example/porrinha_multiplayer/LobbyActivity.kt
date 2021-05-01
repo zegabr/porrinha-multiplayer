@@ -39,7 +39,6 @@ class LobbyActivity : AppCompatActivity() {
         user = getPlayerFromCache()
         roomName = getCurrentRoomFromCache()
         if (!roomName.equals("")) {
-            // vai direto pra o jogo
             goToGameScreen()
         }
 
@@ -63,7 +62,7 @@ class LobbyActivity : AppCompatActivity() {
             LobbyViewModel.initRoom(user.latitude!!, user.longitude!!, user.username!!)
             GameViewModel.setPlayerReference(roomName, user.username!!)
             addRoomEventListener()
-            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, 3, false, true, true)) // adiciona o player na sala como host
+            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
         })
     }
 
@@ -96,6 +95,7 @@ class LobbyActivity : AppCompatActivity() {
     private fun addRoomEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if(!snapshot.exists()) return
                 // join room
                 enableCreateButton()
                 goToGameScreen()
@@ -109,7 +109,7 @@ class LobbyActivity : AppCompatActivity() {
         })
     }
 
-    // TODO: esse nao consegui deixar esse metodo acessivel por varias classes, ainda
+
     private fun getPlayerFromCache(): User {
         val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         var username = preferences.getString("playerName", "").toString()
