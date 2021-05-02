@@ -1,7 +1,6 @@
 package com.example.porrinha_multiplayer.viewModel
 
 import android.content.Context
-import android.widget.Toast
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -72,7 +71,7 @@ object GameViewModel {
             }
             for (player in players) { // remove um de todos que tem diferenca igual a diferenca maxima
                 val playerDifference = abs(totalSelectedSticks - player.value.finalGuess!!)
-                if (playerDifference == maxDifference) {
+                if(playerDifference == maxDifference) {
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
                     this.wonLastRound = 2
                 }else{
