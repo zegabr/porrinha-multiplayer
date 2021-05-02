@@ -1,19 +1,20 @@
 package com.example.porrinha_multiplayer
 
-import android.R
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.porrinha_multiplayer.databinding.ActivityGameBinding
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
+import com.example.porrinha_multiplayer.viewHolder.PlayersAdapter
 import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,7 +26,7 @@ class GameActivity : AppCompatActivity() {
     lateinit var exitButton: Button
     lateinit var roomNameTextView: TextView
     lateinit var roundTextView: TextView
-    lateinit var playersListView: ListView
+    lateinit var playersRecyclerView: RecyclerView
     lateinit var totalSticksInRoomTextview: TextView
     lateinit var lastRoundStickSumTextView: TextView
     lateinit var playerTotalSticksTextView: TextView
@@ -34,7 +35,7 @@ class GameActivity : AppCompatActivity() {
 
     var playerName = ""
     var roomName = ""
-    lateinit var playersList: MutableList<String>
+    lateinit var playersList: MutableList<Player>
 
     lateinit var playerObject: Player
     lateinit var room: Room
@@ -47,7 +48,7 @@ class GameActivity : AppCompatActivity() {
 
         roomNameTextView = binding.roomNameTextView
         roundTextView = binding.roundTextView
-        playersListView = binding.playersListView
+        playersRecyclerView = binding.playersRecycler
         totalSticksInRoomTextview = binding.totalSticksTextview
         lastRoundStickSumTextView = binding.lastRoundSticksTextView
         playerTotalSticksTextView = binding.playerSticksTextView
@@ -126,11 +127,17 @@ class GameActivity : AppCompatActivity() {
                 playersList.clear()
                 val players = snapshot.children
 
-                for (player in players) {
-                    playersList.add(player.key.toString())
+                for (player in players.iterator()) {
+                    var actualPlayer = player.getValue(Player::class.java)
+                    if (actualPlayer != null){
+                        playersList.add(actualPlayer)
+                    }
                 }
-                playersListView.adapter =
-                    ArrayAdapter(this@GameActivity, R.layout.simple_list_item_1, playersList)
+                playersRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(this@GameActivity)
+                    addItemDecoration(DividerItemDecoration(this@GameActivity, DividerItemDecoration.VERTICAL))
+                    adapter = PlayersAdapter(playersList, layoutInflater)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
