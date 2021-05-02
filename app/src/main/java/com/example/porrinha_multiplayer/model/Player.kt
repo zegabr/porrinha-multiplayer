@@ -7,5 +7,4 @@ data class Player(
         var totalSticks: Int? = 0,
         var played: Boolean? = false,
         var host: Boolean? = false,
-        val online: Boolean? = false // TODO: checar se realmente precisa disso
 )

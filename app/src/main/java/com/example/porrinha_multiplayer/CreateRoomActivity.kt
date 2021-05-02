@@ -73,7 +73,6 @@ class CreateRoomActivity : AppCompatActivity() {
                         -1,
                         3,
                         false,
-                        true,
                         true
                     )
                 ) // adiciona o player na sala como host

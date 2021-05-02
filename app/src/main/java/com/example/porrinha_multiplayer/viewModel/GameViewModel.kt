@@ -27,8 +27,8 @@ object GameViewModel {
         FirebaseRepository.setValue(roomRef, room)
     }
 
-    fun setPlayerIsOnline(b: Boolean) {
-        FirebaseRepository.setValue(playerRef.child("online"), b)
+    fun setPlayerName(name: String) {
+        FirebaseRepository.setValue(playerRef.child("name"), name)
     }
 
     fun getTotalSticks(players: Map<String, Player>?): Int {

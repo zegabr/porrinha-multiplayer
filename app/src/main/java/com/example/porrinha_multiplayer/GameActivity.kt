@@ -72,7 +72,7 @@ class GameActivity : AppCompatActivity() {
         addPlayerEventListener() // escuta mudancas no player
         addRoomEventListener() // escuta mudanças na sala
         addPlayersListEventListener()
-        GameViewModel.setPlayerIsOnline(true) // deve triggar os 2 eventlistener
+        GameViewModel.setPlayerName(playerName) // deve triggar os 2 eventlistener
 
         playButton.setOnClickListener {
             if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
