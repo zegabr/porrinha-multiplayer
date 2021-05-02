@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="26dp"
+        android:layout_marginBottom="4dp"
         android:text="@string/play" />
 
     <EditText
@@ -22,8 +22,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="89dp"
+        android:layout_marginBottom="114dp"
         android:ems="10"
+        android:hint="@string/your_play"
         android:inputType="number" />
 
     <TextView
@@ -31,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="165dp"
+        android:layout_marginBottom="179dp"
         android:text="@string/your_sticks" />
 
     <TextView
@@ -40,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="142dp"
+        android:layout_marginBottom="159dp"
         android:text="0" />
 
     <TextView
@@ -126,14 +127,27 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="66dp"
-        android:text="roomname here" />
+        android:text="room name here" />
 
     <Button
         android:id="@+id/exitRoomButton"
         android:layout_width="68dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:text="Exit"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="1dp"
+        android:text="@string/exit"
         app:backgroundTint="#CA0000" />
+
+    <EditText
+        android:id="@+id/finalGuessEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="61dp"
+        android:ems="10"
+        android:hint="@string/your_guess"
+        android:inputType="number" />
 
 </RelativeLayout>

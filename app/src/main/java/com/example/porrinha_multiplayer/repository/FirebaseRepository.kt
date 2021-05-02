@@ -2,10 +2,10 @@ package com.example.porrinha_multiplayer.repository
 
 import android.location.Location
 import com.example.porrinha_multiplayer.model.Player
+import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 
 // https://blog.mindorks.com/how-to-create-a-singleton-class-in-kotlin#:~:text=A%20singleton%20class%20is%20a,like%20NetworkService%2C%20DatabaseService%2C%20etc.
 object FirebaseRepository {
@@ -44,8 +44,12 @@ object FirebaseRepository {
         databaseReference.setValue(value)
     }
 
-    fun getReference(): DatabaseReference {
-        return database.getReference()
+    fun setValue(databaseReference: DatabaseReference, room: Room) {
+        databaseReference.setValue(room)
+    }
+
+    fun removeReference(databaseReference: DatabaseReference) {
+        databaseReference.removeValue()
     }
 
 }

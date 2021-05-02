@@ -1,20 +1,17 @@
 package com.example.porrinha_multiplayer
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.porrinha_multiplayer.databinding.ActivityLoginBinding
-import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
 import com.example.porrinha_multiplayer.viewModel.LoginViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -56,7 +53,13 @@ class LoginActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation
                 .addOnSuccessListener { location : Location? ->
-                    this.location = location!!
+                    if(location != null) {
+                        this.location = location
+                    }else{ // TODO: por alguma razao o celular de zé vem pra cá msm com location ativada
+                        this.location = Location("")
+                        this.location.longitude = -34.5
+                        this.location.latitude = -8.2
+                    }
                 }
 
         // checks if user name exists and get reference
@@ -81,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
 
                 LoginViewModel.setupUserReference(username)
                 addUserRefEventListener(LoginViewModel.userReference)
-                LoginViewModel.setUserReferenceValue(User(username,location.latitude, location.longitude)) // TODO: aparentemente isso trigga o login tbm, msm se o value ja for ""
+                LoginViewModel.setUserReferenceValue(User(username,location.latitude, location.longitude))
             }
         }
     }
@@ -93,8 +96,7 @@ class LoginActivity : AppCompatActivity() {
         userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var user: User = dataSnapshot.getValue(User::class.java)!!
-                if (!user.username.equals("")) { // TODO: mudar esse check pra null qnd trocar user por um objeto
-                    // todo: essa logica tá estranha, realmente preciso modificar algo no database pra saber se o cara tá logado e mandar ele pra a proxima tela?
+                if (!user.username.equals("")) {
                     addCurrentPlayerToCache()
                     goToLobbyScreen() // chama a proxima tela
                 }

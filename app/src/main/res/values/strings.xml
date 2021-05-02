@@ -7,4 +7,7 @@
     <string name="round">Round:</string>
     <string name="game">Game</string>
     <string name="room">Room:</string>
+    <string name="your_play">your play</string>
+    <string name="exit">Exit</string>
+    <string name="your_guess">your guess</string>
 </resources>

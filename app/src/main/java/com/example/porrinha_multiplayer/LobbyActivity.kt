@@ -23,7 +23,7 @@ class LobbyActivity : AppCompatActivity() {
 
     lateinit var recyclerViewRooms: RecyclerView
     lateinit var button: Button
-
+    lateinit var preferences: SharedPreferences
     lateinit var roomsList: MutableList<Room>
 
     var user: User = User("",0.0,0.0)
@@ -35,11 +35,10 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        preferences = getSharedPreferences("PREFS", 0)
         user = getPlayerFromCache()
         roomName = getCurrentRoomFromCache()
         if (!roomName.equals("")) {
-            // vai direto pra o jogo
             goToGameScreen()
         }
 
@@ -63,7 +62,7 @@ class LobbyActivity : AppCompatActivity() {
             LobbyViewModel.initRoom(user.latitude!!, user.longitude!!, user.username!!)
             GameViewModel.setPlayerReference(roomName, user.username!!)
             addRoomEventListener()
-            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, 3, false, true, true)) // adiciona o player na sala como host
+            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
         })
     }
 
@@ -77,13 +76,13 @@ class LobbyActivity : AppCompatActivity() {
                 val recyclerViewRooms = binding.roomsListRecycler
                 for (room in rooms.iterator()) {
                     var actualRoom = room.getValue(Room::class.java)
-                    if (actualRoom != null){
+                    if (actualRoom != null && actualRoom.currentRound == 1){
                         roomsList.add(actualRoom) // adiciona todas as salas
                     }
                 }
                 recyclerViewRooms.apply {
                     layoutManager = LinearLayoutManager(this@LobbyActivity)
-                    adapter = RoomsAdapter(roomsList, user, layoutInflater)
+                    adapter = RoomsAdapter(roomsList, user, preferences, layoutInflater)
                 }
             }
 
@@ -96,6 +95,7 @@ class LobbyActivity : AppCompatActivity() {
     private fun addRoomEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if(!snapshot.exists()) return
                 // join room
                 enableCreateButton()
                 goToGameScreen()
@@ -109,9 +109,8 @@ class LobbyActivity : AppCompatActivity() {
         })
     }
 
-    // TODO: esse nao consegui deixar esse metodo acessivel por varias classes, ainda
+
     private fun getPlayerFromCache(): User {
-        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         var username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
@@ -123,17 +122,12 @@ class LobbyActivity : AppCompatActivity() {
      * Adiciona room atual no cache pra quando abrir o app de novo ja ir pra a tela de Game
      */
     private fun addCurrentRoomToCache() {
-        val preferences: SharedPreferences = getSharedPreferences(
-                "PREFS",
-                0
-        )
         val editor = preferences.edit()
         editor.putString("roomName", roomName) // seta o valor user
         editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
     }
 
     private fun getCurrentRoomFromCache(): String {
-        val preferences: SharedPreferences = getSharedPreferences("PREFS", 0)
         return preferences.getString("roomName", "").toString()
     }
 
