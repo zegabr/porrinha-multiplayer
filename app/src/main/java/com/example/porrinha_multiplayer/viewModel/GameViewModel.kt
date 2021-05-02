@@ -71,7 +71,7 @@ object GameViewModel {
             }
             for (player in players) { // remove um de todos que tem diferenca igual a diferenca maxima
                 val playerDifference = abs(totalSelectedSticks - player.value.finalGuess!!)
-                if(playerDifference == maxDifference) {
+                if (playerDifference == maxDifference) {
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
                     this.wonLastRound = 2
                 }else{
