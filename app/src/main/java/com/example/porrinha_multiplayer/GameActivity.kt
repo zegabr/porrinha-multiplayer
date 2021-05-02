@@ -122,13 +122,18 @@ class GameActivity : AppCompatActivity() {
 
                 for (player in players.iterator()) {
                     var actualPlayer = player.getValue(Player::class.java)
-                    if (actualPlayer != null){
+                    if (actualPlayer != null) {
                         playersList.add(actualPlayer)
                     }
                 }
                 playersRecyclerView.apply {
                     layoutManager = LinearLayoutManager(this@GameActivity)
-                    addItemDecoration(DividerItemDecoration(this@GameActivity, DividerItemDecoration.VERTICAL))
+                    addItemDecoration(
+                        DividerItemDecoration(
+                            this@GameActivity,
+                            DividerItemDecoration.VERTICAL
+                        )
+                    )
                     adapter = PlayersAdapter(playersList, layoutInflater)
                 }
             }
@@ -208,7 +213,6 @@ class GameActivity : AppCompatActivity() {
     }
 
 
-
     private fun addPlayerEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -231,7 +235,7 @@ class GameActivity : AppCompatActivity() {
         playerTotalSticksTextView.text = playerObject.totalSticks.toString()
         if (playerObject.played == false) {
             enableUI()
-        }else{
+        } else {
             disableUI()
         }
         GameViewModel.isHost = playerObject.host == true

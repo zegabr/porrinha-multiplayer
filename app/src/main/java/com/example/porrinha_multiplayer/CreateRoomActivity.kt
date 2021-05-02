@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
 class CreateRoomActivity : AppCompatActivity() {
-    lateinit var binding : ActivityCreateRoomBinding
+    lateinit var binding: ActivityCreateRoomBinding
     lateinit var preferences: SharedPreferences
     lateinit var createRoomButton: Button
     lateinit var goBackButton: Button
@@ -53,8 +53,12 @@ class CreateRoomActivity : AppCompatActivity() {
             val userLongitude = intent.getDoubleExtra("longitude", 0.0)
             val roomName = roomNameInput.text.toString()
             val maxPlayers = playersLimitInput.text.toString().toInt()
-            if(maxPlayers < 2){
-                Toast.makeText(this@CreateRoomActivity, "O mínimo de jogadores é 2", Toast.LENGTH_SHORT).show()
+            if (maxPlayers < 2) {
+                Toast.makeText(
+                    this@CreateRoomActivity,
+                    "O mínimo de jogadores é 2",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 createRoomButton.setText("CREATING ROOM")
                 createRoomButton.isEnabled = false
@@ -62,13 +66,23 @@ class CreateRoomActivity : AppCompatActivity() {
                 LobbyViewModel.initRoom(userLatitude, userLongitude, roomName, maxPlayers)
                 GameViewModel.setPlayerReference(roomName, username!!)
                 addRoomEventListener()
-                GameViewModel.setPlayerReferenceValue(Player(username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
+                GameViewModel.setPlayerReferenceValue(
+                    Player(
+                        username,
+                        0,
+                        -1,
+                        3,
+                        false,
+                        true,
+                        true
+                    )
+                ) // adiciona o player na sala como host
             }
         }
     }
 
     private fun addBackButtonEventListener() {
-        goBackButton.setOnClickListener{
+        goBackButton.setOnClickListener {
             val intent = Intent(this@CreateRoomActivity, LobbyActivity::class.java)
             startActivity(intent)
             finishActivity() // encerra activity atual
@@ -76,20 +90,21 @@ class CreateRoomActivity : AppCompatActivity() {
     }
 
     private fun addRoomEventListener() {
-        addRoomListener = GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(!snapshot.exists()) return
-                // join room
-                enableCreateButton()
-                goToGameScreen()
-            }
+        addRoomListener =
+            GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.exists()) return
+                    // join room
+                    enableCreateButton()
+                    goToGameScreen()
+                }
 
-            override fun onCancelled(error: DatabaseError) {
-                // error
-                enableCreateButton()
-                Toast.makeText(this@CreateRoomActivity, "Error", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    // error
+                    enableCreateButton()
+                    Toast.makeText(this@CreateRoomActivity, "Error", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun enableCreateButton() {

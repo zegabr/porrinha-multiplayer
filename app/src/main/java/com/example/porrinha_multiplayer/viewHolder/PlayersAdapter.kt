@@ -7,10 +7,10 @@ import com.example.porrinha_multiplayer.databinding.PlayersGameBinding
 import com.example.porrinha_multiplayer.model.Player
 
 class PlayersAdapter(
-        private val players: MutableList<Player>,
-        private val inflater: LayoutInflater) :
-        RecyclerView.Adapter<PlayersViewHolder>()
-{
+    private val players: MutableList<Player>,
+    private val inflater: LayoutInflater
+) :
+    RecyclerView.Adapter<PlayersViewHolder>() {
     override fun getItemCount(): Int = players.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlayersViewHolder {
