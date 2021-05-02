@@ -1,6 +1,5 @@
 package com.example.porrinha_multiplayer.viewModel
 
-import android.content.Context
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -43,9 +42,9 @@ object GameViewModel {
         return total
     }
 
-    fun processGameState(room: Room, playerName: String, applicationContext: Context): Room {
+    fun processGameState(room: Room): Room {
         var players = room.players
-        var totalSelectedSticks = this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
+        val totalSelectedSticks = this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
 
         players = updateWinnersAndLoosers(players, totalSelectedSticks)
 
@@ -135,7 +134,7 @@ object GameViewModel {
     }
 
     fun playerWon(room: Room): Boolean {
-        var players = room.players
+        val players = room.players
         if (players != null) {
             return room.currentRound!! > room.maxRounds!! // acabou as rodadas
                     || (players.size == 1 && room.currentRound != 1)

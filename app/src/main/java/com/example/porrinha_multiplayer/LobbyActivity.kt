@@ -52,9 +52,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun finishActivity() {
-        if (addRoomsListener != null){
-            LobbyViewModel.roomsRef.removeEventListener(addRoomsListener) //Removendo o event listener
-        }
+        LobbyViewModel.roomsRef.removeEventListener(addRoomsListener)
         finish()
     }
 
@@ -78,7 +76,7 @@ class LobbyActivity : AppCompatActivity() {
                 val rooms = snapshot.children
                 val recyclerViewRooms = binding.roomsListRecycler
                 for (room in rooms.iterator()) {
-                    var actualRoom = room.getValue(Room::class.java)
+                    val actualRoom = room.getValue(Room::class.java)
                     if (actualRoom != null && actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!){
                         roomsList.add(actualRoom) // adiciona todas as salas
                     }
@@ -96,7 +94,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun getPlayerFromCache(): User {
-        var username = preferences.getString("playerName", "").toString()
+        val username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
 

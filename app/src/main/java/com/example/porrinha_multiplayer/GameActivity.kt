@@ -163,7 +163,7 @@ class GameActivity : AppCompatActivity() {
                         GameViewModel.updateMaxRounds(
                             max(
                                 room.maxRounds!!,
-                                3 * players.values.size!!
+                                3 * players.values.size
                             )
                         )
 
@@ -171,7 +171,7 @@ class GameActivity : AppCompatActivity() {
                             // update processing pra true
                             GameViewModel.setProcessing()
                             // processa jogo seando processing pra false
-                            room = GameViewModel.processGameState(room, playerName, this@GameActivity)
+                            room = GameViewModel.processGameState(room)
                             // update room com is processing pra false tbm
                             GameViewModel.updateRoom(room)
                         }

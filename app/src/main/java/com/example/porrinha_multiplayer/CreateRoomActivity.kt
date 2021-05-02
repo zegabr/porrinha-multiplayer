@@ -41,14 +41,12 @@ class CreateRoomActivity : AppCompatActivity() {
 
     private fun finishActivity() {
         //Removendo o event listener
-        if (addRoomListener != null){
-            LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
-        }
+        LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
         finish()
     }
 
     private fun addCreateRoomButtonEventListener() {
-        createRoomButton.setOnClickListener(View.OnClickListener {
+        createRoomButton.setOnClickListener {
             // cria sala e adiciona o user como um player novo
             var username = intent.getStringExtra("name")
             var userLatitude = intent.getDoubleExtra("latitude", 0.0)
@@ -74,15 +72,15 @@ class CreateRoomActivity : AppCompatActivity() {
                 }
             }
 
-        })
+        }
     }
 
     private fun addBackButtonEventListener() {
-        goBackButton.setOnClickListener(View.OnClickListener {
+        goBackButton.setOnClickListener{
             val intent = Intent(this@CreateRoomActivity, LobbyActivity::class.java)
             startActivity(intent)
             finishActivity() // encerra activity atual
-        })
+        }
     }
 
     private fun addRoomEventListener() {
