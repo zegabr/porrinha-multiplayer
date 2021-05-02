@@ -9,11 +9,9 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.porrinha_multiplayer.databinding.ActivityLobbyBinding
-import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
 import com.example.porrinha_multiplayer.viewHolder.RoomsAdapter
-import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.example.porrinha_multiplayer.viewModel.LobbyViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

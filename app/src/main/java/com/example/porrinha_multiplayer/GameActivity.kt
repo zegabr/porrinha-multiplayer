@@ -73,7 +73,7 @@ class GameActivity : AppCompatActivity() {
         addRoomEventListener() // escuta mudanças na sala
         addPlayersListEventListener()
         GameViewModel.setPlayerName(playerName) // deve triggar os 2 eventlistener
-
+        GameViewModel.inGame = true
         playButton.setOnClickListener {
             if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
                 Toast.makeText(
@@ -247,16 +247,11 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun enableUI() {
-//        sticksToPlayEditText.isFocusable = true
-//        finalGuessEditText.isFocusable = true
         playButton.text = "Play"
         playButton.isEnabled = true
     }
 
     private fun disableUI() {
-//        sticksToPlayEditText.isFocusable = false
-//        finalGuessEditText.isFocusable = false
-
         sticksToPlayEditText.text.clear()
         finalGuessEditText.text.clear()
 
@@ -265,18 +260,25 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun goToLooserScreen() {
-        removeCurrentRoomFromCache()
-        startActivity(Intent(this@GameActivity, LooserActivity::class.java))
-        finish()
+        if(GameViewModel.inGame) {
+            GameViewModel.inGame = false
+            removeCurrentRoomFromCache()
+            startActivity(Intent(this@GameActivity, LooserActivity::class.java))
+            finish()
+        }
     }
 
     private fun goToWinnerScreen() {
-        removeCurrentRoomFromCache()
-        startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
-        finish()
+        if(GameViewModel.inGame){
+            GameViewModel.inGame = false
+            removeCurrentRoomFromCache()
+            startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
+            finish()
+        }
     }
 
     private fun goToLobbyScreen() {
+
         removeCurrentRoomFromCache()
         startActivity(Intent(this@GameActivity, LobbyActivity::class.java))
         finish()

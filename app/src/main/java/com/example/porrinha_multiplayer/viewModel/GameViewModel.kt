@@ -8,6 +8,7 @@ import kotlin.math.abs
 import kotlin.math.max
 
 object GameViewModel {
+    var inGame: Boolean = false
     var wonLastRound: Int = 0
     var isHost: Boolean = false
     lateinit var playerRef: DatabaseReference
@@ -141,8 +142,7 @@ object GameViewModel {
     fun playerWon(room: Room, player: Player): Boolean {
         val players = room.players
         if (players != null) {
-            return room.currentRound!! > room.maxRounds!! // acabou as rodadas
-                    || (players.size == 1 && room.currentRound != 1 && player.totalSticks != 0)
+            return (players.size == 1 && room.currentRound != 1)
         } // só existe 1 player e já passou da 1a rodada
         return false
     }
