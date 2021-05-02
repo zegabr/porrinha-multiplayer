@@ -23,6 +23,6 @@ object LobbyViewModel {
         FirebaseRepository.setValue(roomRef.child("processing"), false)
     }
 
-    lateinit var roomsRef : DatabaseReference
-    lateinit var roomRef : DatabaseReference
+    lateinit var roomsRef: DatabaseReference
+    lateinit var roomRef: DatabaseReference
 }

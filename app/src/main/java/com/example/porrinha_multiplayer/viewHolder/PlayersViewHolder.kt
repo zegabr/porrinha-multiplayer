@@ -5,18 +5,17 @@ import com.example.porrinha_multiplayer.databinding.PlayersGameBinding
 import com.example.porrinha_multiplayer.model.Player
 
 class PlayersViewHolder(private val binding: PlayersGameBinding) :
-        RecyclerView.ViewHolder(binding.root)
-{
-    var playerName : String = ""
-    var actualSticksCount : String = "0"
+    RecyclerView.ViewHolder(binding.root) {
+    var playerName: String = ""
+    var actualSticksCount: String = "0"
 
-    fun bindTo(player : Player) {
+    fun bindTo(player: Player) {
         //Fazendo o binding do jogo no rooms linearlayout
         playerName = player.name!!
         actualSticksCount = player.totalSticks!!.toString()
-        if(player.played!!){
+        if (player.played!!) {
             binding.isReady.text = "Sim"
-        }else {
+        } else {
             binding.isReady.text = "Não"
         }
         binding.playerName.text = playerName

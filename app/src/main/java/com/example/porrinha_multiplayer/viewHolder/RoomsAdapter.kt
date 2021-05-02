@@ -10,12 +10,12 @@ import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
 
 class RoomsAdapter(
-        private val rooms: MutableList<Room>,
-        private val user: User,
-        private val preferences: SharedPreferences,
-        private val inflater: LayoutInflater) :
-        RecyclerView.Adapter<RoomsViewHolder>()
-{
+    private val rooms: MutableList<Room>,
+    private val user: User,
+    private val preferences: SharedPreferences,
+    private val inflater: LayoutInflater
+) :
+    RecyclerView.Adapter<RoomsViewHolder>() {
     override fun getItemCount(): Int = rooms.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomsViewHolder {

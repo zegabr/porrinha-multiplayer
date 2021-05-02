@@ -38,10 +38,10 @@ class LoginActivity : AppCompatActivity() {
         return ActivityCompat.checkSelfPermission(
             this,
             android.Manifest.permission.ACCESS_COARSE_LOCATION
-        )!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
             this,
             android.Manifest.permission.ACCESS_FINE_LOCATION
-        )!= PackageManager.PERMISSION_GRANTED
+        ) != PackageManager.PERMISSION_GRANTED
     }
 
     fun finishActivity() {
@@ -58,7 +58,7 @@ class LoginActivity : AppCompatActivity() {
         editText = binding.editTextLogin
         button = binding.buttonLogin
 
-        while(verifyPermission()) {
+        while (verifyPermission()) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(
                     android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -69,15 +69,15 @@ class LoginActivity : AppCompatActivity() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    if(location != null) {
-                        this.location = location
-                    }else{
-                        this.location = Location("")
-                        this.location.longitude = -34.5
-                        this.location.latitude = -8.2
-                    }
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    this.location = location
+                } else {
+                    this.location = Location("")
+                    this.location.longitude = -34.5
+                    this.location.latitude = -8.2
                 }
+            }
 
         // checks if user name exists and get reference
         user = getPlayerFromCache()
@@ -170,7 +170,7 @@ class LoginActivity : AppCompatActivity() {
         username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
-        if(!username.equals("")) {
+        if (!username.equals("")) {
             location = Location("")
             location.latitude = latitude
             location.longitude = longitude

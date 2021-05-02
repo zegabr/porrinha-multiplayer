@@ -10,9 +10,9 @@ import kotlin.math.max
 object GameViewModel {
     var wonLastRound: Int = 0
     var isHost: Boolean = false
-    lateinit var playerRef : DatabaseReference
-    lateinit var roomRef : DatabaseReference
-    lateinit var playersRef : DatabaseReference
+    lateinit var playerRef: DatabaseReference
+    lateinit var roomRef: DatabaseReference
+    lateinit var playersRef: DatabaseReference
 
     fun setPlayerReference(roomName: String, playerName: String) {
         playerRef = FirebaseRepository.getReference("rooms/$roomName/players/$playerName")
@@ -35,7 +35,7 @@ object GameViewModel {
     fun getTotalSticks(players: Map<String, Player>?): Int {
         var total = 0
         if (players != null) {
-            for (player in players.values){
+            for (player in players.values) {
                 total += player.totalSticks!!
             }
         }
@@ -44,7 +44,8 @@ object GameViewModel {
 
     fun processGameState(room: Room): Room {
         var players = room.players
-        val totalSelectedSticks = this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
+        val totalSelectedSticks =
+            this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
 
         players = updateWinnersAndLoosers(players, totalSelectedSticks)
 
@@ -61,13 +62,14 @@ object GameViewModel {
     ): Map<String, Player>? {
         var maxDifference = 0
         if (players != null) {
-            for (player in players){ // pega a diferenca maxima
-                maxDifference = max(maxDifference, abs(totalSelectedSticks - player.value.finalGuess!!))
+            for (player in players) { // pega a diferenca maxima
+                maxDifference =
+                    max(maxDifference, abs(totalSelectedSticks - player.value.finalGuess!!))
                 player.value.played = false
             }
-            for (player in players){ // remove um de todos que tem diferenca igual a diferenca maxima
+            for (player in players) { // remove um de todos que tem diferenca igual a diferenca maxima
                 val playerDifference = abs(totalSelectedSticks - player.value.finalGuess!!)
-                if(playerDifference == maxDifference){
+                if (playerDifference == maxDifference) {
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
                     this.wonLastRound = 2
                 }else{
@@ -81,7 +83,7 @@ object GameViewModel {
     private fun getTotalSelectedSticks(players: Map<String, Player>?): Int {
         var total = 0
         if (players != null) {
-            for (player in players.values){
+            for (player in players.values) {
                 total += player.selectedSticks!!
             }
         }
@@ -90,8 +92,8 @@ object GameViewModel {
 
     fun allPlayersHavePlayed(players: Map<String, Player>?): Boolean {
         if (players != null) {
-            for (player in players.values){
-                if (player.played == false){
+            for (player in players.values) {
+                if (player.played == false) {
                     return false
                 }
             }
@@ -109,8 +111,8 @@ object GameViewModel {
 
     fun hasHost(players: Map<String, Player>?): Boolean {
         if (players != null) {
-            for (player in players.values){
-                if (player.host == true){
+            for (player in players.values) {
+                if (player.host == true) {
                     return true
                 }
             }
@@ -118,12 +120,15 @@ object GameViewModel {
         return false
     }
 
-    fun setFirstPlayerAsHost(players: Map<String, Player>?, playerName: String): Map<String, Player>? {
+    fun setFirstPlayerAsHost(
+        players: Map<String, Player>?,
+        playerName: String
+    ): Map<String, Player>? {
         if (players != null) {
-            for (player in players.values){
-                if (player.host == false){
+            for (player in players.values) {
+                if (player.host == false) {
                     player.host = true // faz o 1o do map ser host e para
-                    if(playerName.equals(player.name)){
+                    if (playerName.equals(player.name)) {
                         this.isHost = true
                     }
                     return players
