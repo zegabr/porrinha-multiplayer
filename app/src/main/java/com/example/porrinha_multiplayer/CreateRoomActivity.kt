@@ -54,18 +54,26 @@ class CreateRoomActivity : AppCompatActivity() {
             var userLatitude = intent.getDoubleExtra("latitude", 0.0)
             var userLongitude = intent.getDoubleExtra("longitude", 0.0)
             var roomName = roomNameInput.text.toString()
-            var maxPlayers = playersLimitInput.text.toString().toInt()
-            if(maxPlayers < 2){
-                Toast.makeText(this@CreateRoomActivity, "O mínimo de jogadores é 2", Toast.LENGTH_SHORT).show()
-            } else {
-                createRoomButton.setText("CREATING ROOM")
-                createRoomButton.isEnabled = false
-                LobbyViewModel.setRoomReference(roomName)
-                LobbyViewModel.initRoom(userLatitude, userLongitude, roomName, maxPlayers)
-                GameViewModel.setPlayerReference(roomName, username!!)
-                addRoomEventListener()
-                GameViewModel.setPlayerReferenceValue(Player(username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
+            if (playersLimitInput.text.isBlank()){
+                Toast.makeText(this@CreateRoomActivity, "O número de jogadores não pode ser vazio", Toast.LENGTH_SHORT).show()
+            }else{
+                var maxPlayers = playersLimitInput.text.toString().toInt()
+
+                if(maxPlayers < 2){
+                    Toast.makeText(this@CreateRoomActivity, "O mínimo de jogadores é 2", Toast.LENGTH_SHORT).show()
+                }else if (roomName.equals("")){
+                    Toast.makeText(this@CreateRoomActivity, "O nome da sala não pode ser vazio", Toast.LENGTH_SHORT).show()
+                } else {
+                    createRoomButton.setText("CREATING ROOM")
+                    createRoomButton.isEnabled = false
+                    LobbyViewModel.setRoomReference(roomName)
+                    LobbyViewModel.initRoom(userLatitude, userLongitude, roomName, maxPlayers)
+                    GameViewModel.setPlayerReference(roomName, username!!)
+                    addRoomEventListener()
+                    GameViewModel.setPlayerReferenceValue(Player(username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
+                }
             }
+
         })
     }
 

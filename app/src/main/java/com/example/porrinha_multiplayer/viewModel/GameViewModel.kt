@@ -1,5 +1,7 @@
 package com.example.porrinha_multiplayer.viewModel
 
+import android.content.Context
+import android.widget.Toast
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -8,6 +10,7 @@ import kotlin.math.abs
 import kotlin.math.max
 
 object GameViewModel {
+    var wonLastRound: Int = 0
     var isHost: Boolean = false
     lateinit var playerRef : DatabaseReference
     lateinit var roomRef : DatabaseReference
@@ -41,7 +44,7 @@ object GameViewModel {
         return total
     }
 
-    fun processGameState(room: Room): Room {
+    fun processGameState(room: Room, playerName: String, applicationContext: Context): Room {
         var players = room.players
         var totalSelectedSticks = this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
 
@@ -53,7 +56,10 @@ object GameViewModel {
         return room
     }
 
-    private fun updateWinnersAndLoosers(players: Map<String, Player>?, totalSelectedSticks: Int): Map<String, Player>? {
+    private fun updateWinnersAndLoosers(
+        players: Map<String, Player>?,
+        totalSelectedSticks: Int
+    ): Map<String, Player>? {
         var maxDifference = 0
         if (players != null) {
             for (player in players){ // pega a diferenca maxima
@@ -63,6 +69,9 @@ object GameViewModel {
             for (player in players){ // remove um de todos que tem diferenca igual a diferenca maxima
                 if(abs(totalSelectedSticks - player.value.selectedSticks!!) == maxDifference){
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
+                    this.wonLastRound = 2
+                }else{
+                    this.wonLastRound = 1
                 }
             }
         }

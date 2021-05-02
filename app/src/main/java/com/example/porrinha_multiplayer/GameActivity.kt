@@ -160,7 +160,7 @@ class GameActivity : AppCompatActivity() {
 
                 if (players != null) {
                     if (GameViewModel.isHost && players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
-                        room = GameViewModel.processGameState(room)
+                        room = GameViewModel.processGameState(room, playerName, this@GameActivity)
                         GameViewModel.updateRoom(room)
                     } else if (!GameViewModel.isHost) {
                         if (!GameViewModel.hasHost(players)) {
@@ -208,6 +208,11 @@ class GameActivity : AppCompatActivity() {
                     playerObject.played == false // só pode apertar play se nao tiver jogado, o played vai ser atualizado no processamento do jogo
                 GameViewModel.isHost = playerObject.host == true
 
+                if(GameViewModel.wonLastRound == 1){
+                    Toast.makeText(applicationContext,"Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT)
+                }else if(GameViewModel.wonLastRound == 2){
+                    Toast.makeText(applicationContext,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT)
+                }
                 if (playerObject.totalSticks == 0) { // Player perdeu
                     goToLooserScreen()
                     GameViewModel.removePlayerFromRoom()
