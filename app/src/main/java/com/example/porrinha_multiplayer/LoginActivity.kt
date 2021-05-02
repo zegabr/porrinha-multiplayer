@@ -45,7 +45,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun finishActivity() {
-        LoginViewModel.userReference.removeEventListener(addUserRefListener)
+        if(addUserRefListener != null){
+            LoginViewModel.userReference.removeEventListener(addUserRefListener)
+        }
         finish()
     }
 

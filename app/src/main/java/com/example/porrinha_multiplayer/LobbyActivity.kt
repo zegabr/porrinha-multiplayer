@@ -50,7 +50,9 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun finishActivity() {
-        LobbyViewModel.roomsRef.removeEventListener(addRoomsListener)
+        if (addRoomsListener != null){
+            LobbyViewModel.roomsRef.removeEventListener(addRoomsListener) //Removendo o event listener
+        }
         finish()
     }
 
