@@ -49,8 +49,7 @@ class RoomsViewHolder(private val binding: RoomBinding) :
                 -1,
                 3,
                 false,
-                false,
-                true
+                false
             )
         ) //rooms/{roomName}/players/playerName
     }
