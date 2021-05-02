@@ -41,9 +41,7 @@ class CreateRoomActivity : AppCompatActivity() {
 
     private fun finishActivity() {
         //Removendo o event listener
-        if (addRoomListener != null){
-            LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
-        }
+        LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
         finish()
     }
 
