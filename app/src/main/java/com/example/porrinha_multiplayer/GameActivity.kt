@@ -163,7 +163,7 @@ class GameActivity : AppCompatActivity() {
                         GameViewModel.updateMaxRounds(
                             max(
                                 room.maxRounds!!,
-                                3 * players.values.size!!
+                                3 * players.values.size
                             )
                         )
 

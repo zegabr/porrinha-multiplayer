@@ -41,20 +41,18 @@ class CreateRoomActivity : AppCompatActivity() {
 
     private fun finishActivity() {
         //Removendo o event listener
-        if (addRoomListener != null){
-            LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
-        }
+        LobbyViewModel.roomsRef.removeEventListener(addRoomListener)
         finish()
     }
 
     private fun addCreateRoomButtonEventListener() {
-        createRoomButton.setOnClickListener(View.OnClickListener {
+        createRoomButton.setOnClickListener {
             // cria sala e adiciona o user como um player novo
-            var username = intent.getStringExtra("name")
-            var userLatitude = intent.getDoubleExtra("latitude", 0.0)
-            var userLongitude = intent.getDoubleExtra("longitude", 0.0)
-            var roomName = roomNameInput.text.toString()
-            var maxPlayers = playersLimitInput.text.toString().toInt()
+            val username = intent.getStringExtra("name")
+            val userLatitude = intent.getDoubleExtra("latitude", 0.0)
+            val userLongitude = intent.getDoubleExtra("longitude", 0.0)
+            val roomName = roomNameInput.text.toString()
+            val maxPlayers = playersLimitInput.text.toString().toInt()
             if(maxPlayers < 2){
                 Toast.makeText(this@CreateRoomActivity, "O mínimo de jogadores é 2", Toast.LENGTH_SHORT).show()
             } else {
@@ -66,15 +64,15 @@ class CreateRoomActivity : AppCompatActivity() {
                 addRoomEventListener()
                 GameViewModel.setPlayerReferenceValue(Player(username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
             }
-        })
+        }
     }
 
     private fun addBackButtonEventListener() {
-        goBackButton.setOnClickListener(View.OnClickListener {
+        goBackButton.setOnClickListener{
             val intent = Intent(this@CreateRoomActivity, LobbyActivity::class.java)
             startActivity(intent)
             finishActivity() // encerra activity atual
-        })
+        }
     }
 
     private fun addRoomEventListener() {

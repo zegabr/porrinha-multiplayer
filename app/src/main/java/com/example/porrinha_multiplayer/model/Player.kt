@@ -7,6 +7,5 @@ data class Player(
         var totalSticks: Int? = 0,
         var played: Boolean? = false,
         var host: Boolean? = false,
-        val online: Boolean? = false // TODO: talvez a gt n precise disso
+        val online: Boolean? = false // TODO: checar se realmente precisa disso
 )
-// ESSE é pra ser usado em jogo, nao como user

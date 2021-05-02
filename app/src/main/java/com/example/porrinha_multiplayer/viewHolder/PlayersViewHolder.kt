@@ -14,7 +14,7 @@ class PlayersViewHolder(private val binding: PlayersGameBinding) :
         //Fazendo o binding do jogo no rooms linearlayout
         playerName = player.name!!
         actualSticksCount = player.totalSticks!!.toString()
-        if(player.played!! == true){
+        if(player.played!!){
             binding.isReady.text = "Sim"
         }else {
             binding.isReady.text = "Não"

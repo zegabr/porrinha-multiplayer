@@ -12,12 +12,7 @@ object LoginViewModel {
         userReference = FirebaseRepository.getReference("users/$username")
     }
 
-    fun setUserReferenceValue(value: User) { // TODO: trocar pra User
+    fun setUserReferenceValue(value: User) {
         FirebaseRepository.setValue(userReference, value)
     }
-
-    fun setUserLocation(location: Location) {
-        FirebaseRepository.setValue(userReference.child("location"), location)
-    }
-
 }

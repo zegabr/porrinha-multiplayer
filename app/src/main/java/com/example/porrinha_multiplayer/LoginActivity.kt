@@ -45,9 +45,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun finishActivity() {
-        if(addUserRefListener != null){
-            LoginViewModel.userReference.removeEventListener(addUserRefListener)
-        }
+        LoginViewModel.userReference.removeEventListener(addUserRefListener)
         finish()
     }
 
@@ -74,7 +72,7 @@ class LoginActivity : AppCompatActivity() {
                 .addOnSuccessListener { location: Location? ->
                     if(location != null) {
                         this.location = location
-                    }else{ // TODO: por alguma razao o celular de zé vem pra cá msm com location ativada
+                    }else{
                         this.location = Location("")
                         this.location.longitude = -34.5
                         this.location.latitude = -8.2
@@ -126,7 +124,7 @@ class LoginActivity : AppCompatActivity() {
     private fun addUserRefEventListener(userReference: DatabaseReference) {
         addUserRefListener = userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                var user: User = dataSnapshot.getValue(User::class.java)!!
+                val user: User = dataSnapshot.getValue(User::class.java)!!
                 if (!user.username.equals("")) {
                     addCurrentPlayerToCache()
                     goToLobbyScreen() // chama a proxima tela
@@ -139,7 +137,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Error Logging in", Toast.LENGTH_SHORT).show()
             }
         })
-
     }
 
     /**

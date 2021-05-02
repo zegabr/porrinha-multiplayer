@@ -28,11 +28,9 @@ class RoomsViewHolder(private val binding: RoomBinding) :
             val intent = Intent(c, GameActivity::class.java)
             intent.putExtra("roomName", roomName)
             setReferences()
-            if (preferences != null) {
-                val editor = preferences.edit()
-                editor.putString("roomName", roomName) // seta o valor user
-                editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
-            }
+            val editor = preferences.edit()
+            editor.putString("roomName", roomName) // seta o valor user
+            editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
             c.startActivity(intent)
             val activity : LobbyActivity = c as LobbyActivity
             activity.finish()
