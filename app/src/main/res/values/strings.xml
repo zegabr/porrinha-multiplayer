@@ -1,13 +1,23 @@
 <resources>
     <string name="app_name">Porrinha-multiplayer</string>
-    <string name="play">Play</string>
-    <string name="your_sticks">Your Sticks</string>
-    <string name="sticks_on_last_round">Sticks on last round</string>
-    <string name="total_sticks">Total Sticks</string>
-    <string name="round">Round:</string>
-    <string name="game">Game</string>
-    <string name="room">Room:</string>
-    <string name="your_play">your play</string>
-    <string name="exit">Exit</string>
-    <string name="your_guess">your guess</string>
+    <string name="play">Jogar</string>
+    <string name="your_sticks">Seus palitos</string>
+    <string name="sticks_on_last_round">Palitos no último round</string>
+    <string name="total_sticks">Total de Palitos</string>
+    <string name="round">Rodada:</string>
+    <string name="game">Jogo</string>
+    <string name="room">Sala:</string>
+    <string name="your_play">Sua jogada</string>
+    <string name="exit">Sair</string>
+    <string name="your_guess">Seu palpite</string>
+    <string name="room_name">Nome da sala</string>
+    <string name="room_limit">Limite usuários (mín 2)</string>
+    <string name="create_room">Criar sala</string>
+    <string name="back_button">Voltar</string>
+    <string name="players_count">Qtde de jogadores</string>
+    <string name="distance">Distância</string>
+    <string name="your_name">Seu nome</string>
+    <string name="login">Login</string>
+    <string name="lost_text">Você perdeu!</string>
+    <string name="won_text">Você ganhou!</string>
 </resources>
