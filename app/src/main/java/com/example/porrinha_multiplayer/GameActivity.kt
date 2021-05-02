@@ -20,6 +20,7 @@ import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import kotlin.math.max
 
 class GameActivity : AppCompatActivity() {
 
@@ -98,16 +99,7 @@ class GameActivity : AppCompatActivity() {
                     playerObject.selectedSticks = sticksToPlay
                     playerObject.finalGuess = finalGuess
 
-                    sticksToPlayEditText.isEnabled = false
-                    sticksToPlayEditText.isClickable = false
-                    sticksToPlayEditText.isFocusable = false
-
-                    finalGuessEditText.isEnabled = false
-                    finalGuessEditText.isClickable = false
-                    finalGuessEditText.isFocusable = false
-
-                    playButton.isEnabled = false
-                    playButton.text = "Waiting..."
+                    disableUI()
 
                     GameViewModel.setPlayerReferenceValue(playerObject)
                 }
@@ -123,7 +115,7 @@ class GameActivity : AppCompatActivity() {
     private fun addPlayersListEventListener() {
         GameViewModel.playersRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (!snapshot.hasChild(playerName)) return // evita fazer outrsa coisas se o player ja saiu da sala
+                if (!snapshot.hasChild(playerName)) return // evita fazer outras coisas se o player ja saiu da sala
                 // show list of rooms
                 playersList.clear()
                 val players = snapshot.children
@@ -158,12 +150,32 @@ class GameActivity : AppCompatActivity() {
 
                 room = snapshot.getValue(Room::class.java)!!
                 var players = room.players
-
                 if (players != null) {
-                    if (GameViewModel.isHost && players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
-                        room = GameViewModel.processGameState(room, playerName, this@GameActivity)
-                        GameViewModel.updateRoom(room)
-                    } else if (!GameViewModel.isHost) {
+
+                    if (room.processing) { // se for fazer algo enquanto processa, só pode leitura
+                        playerObject = players[playerName]!!
+                        return
+                    }
+
+
+                    if (GameViewModel.isHost) {
+                        // update maxRounds
+                        GameViewModel.updateMaxRounds(
+                            max(
+                                room.maxRounds!!,
+                                3 * players.values.size!!
+                            )
+                        )
+
+                        if (players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
+                            // update processing pra true
+                            GameViewModel.setProcessing()
+                            // processa jogo seando processing pra false
+                            room = GameViewModel.processGameState(room, playerName, this@GameActivity)
+                            // update room com is processing pra false tbm
+                            GameViewModel.updateRoom(room)
+                        }
+                    } else {
                         if (!GameViewModel.hasHost(players)) {
                             players = GameViewModel.setFirstPlayerAsHost(players, playerName)
                             room.players = players
@@ -172,19 +184,15 @@ class GameActivity : AppCompatActivity() {
                     }
 
                     if (players != null) {
-                        if (GameViewModel.playerWon(room)) {
-                            goToWinnerScreen()
-                            GameViewModel.finnishRoom()
-                        }
-                        playerObject = players.get(playerName)!!
+
+                        playerObject = players[playerName]!!
                         if (playerObject.played == false) {
-                            sticksToPlayEditText.isEnabled = true
-                            sticksToPlayEditText.isClickable = true
-                            sticksToPlayEditText.isFocusable = true
-                            finalGuessEditText.isEnabled = true
-                            finalGuessEditText.isClickable = true
-                            finalGuessEditText.isFocusable = true
-                            playButton.text = "Play"
+                            enableUI()
+                        }
+
+                        if (GameViewModel.playerWon(room)) {
+                            GameViewModel.finnishRoom()
+                            goToWinnerScreen()
                         }
                     }
                 }
@@ -199,34 +207,57 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+
+
     private fun addPlayerEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) return
                 playerObject = snapshot.getValue(Player::class.java)!!
-                playerTotalSticksTextView.text = playerObject.totalSticks.toString()
-                playButton.isEnabled =
-                    playerObject.played == false // só pode apertar play se nao tiver jogado, o played vai ser atualizado no processamento do jogo
-                if(playButton.isEnabled == false){
-                    playButton.text = "Waiting..."
-                }else{
-                    playButton.text = "Play"
-                }
-                GameViewModel.isHost = playerObject.host == true
 
-                if(GameViewModel.wonLastRound == 1){
-                    Toast.makeText(applicationContext,"Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT)
-                }else if(GameViewModel.wonLastRound == 2){
-                    Toast.makeText(applicationContext,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT)
-                }
-                if (playerObject.totalSticks == 0) { // Player perdeu
-                    goToLooserScreen()
+                updatePlayerUI(playerObject)
+
+                if (GameViewModel.playerLost(playerObject)) {
                     GameViewModel.removePlayerFromRoom()
+                    goToLooserScreen()
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+    private fun updatePlayerUI(playerObject: Player) {
+        playerTotalSticksTextView.text = playerObject.totalSticks.toString()
+        if (playerObject.played == false) {
+            enableUI()
+        }else{
+            disableUI()
+        }
+        if(GameViewModel.wonLastRound == 1){
+            Toast.makeText(applicationContext,"Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT)
+        }else if(GameViewModel.wonLastRound == 2){
+            Toast.makeText(applicationContext,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT)
+        }
+        GameViewModel.isHost = playerObject.host == true
+    }
+
+    private fun enableUI() {
+//        sticksToPlayEditText.isFocusable = true
+//        finalGuessEditText.isFocusable = true
+        playButton.text = "Play"
+        playButton.isEnabled = true
+    }
+
+    private fun disableUI() {
+//        sticksToPlayEditText.isFocusable = false
+//        finalGuessEditText.isFocusable = false
+
+        sticksToPlayEditText.text.clear()
+        finalGuessEditText.text.clear()
+
+        playButton.isEnabled = false
+        playButton.text = "Waiting..."
     }
 
     private fun goToLooserScreen() {
