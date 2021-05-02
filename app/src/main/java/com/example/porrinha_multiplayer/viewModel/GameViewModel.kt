@@ -138,11 +138,11 @@ object GameViewModel {
         return players
     }
 
-    fun playerWon(room: Room): Boolean {
+    fun playerWon(room: Room, player: Player): Boolean {
         val players = room.players
         if (players != null) {
             return room.currentRound!! > room.maxRounds!! // acabou as rodadas
-                    || (players.size == 1 && room.currentRound != 1)
+                    || (players.size == 1 && room.currentRound != 1 && player.totalSticks != 0)
         } // só existe 1 player e já passou da 1a rodada
         return false
     }

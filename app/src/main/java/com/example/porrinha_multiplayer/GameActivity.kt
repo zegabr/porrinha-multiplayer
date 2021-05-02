@@ -91,7 +91,7 @@ class GameActivity : AppCompatActivity() {
                         "This is more than you have",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else if (sticksToPlay <= 0 || finalGuess <= 0) {
+                } else if (sticksToPlay < 0 || finalGuess < 0) {
                     Toast.makeText(applicationContext, "Quantity not allowed", Toast.LENGTH_SHORT)
                         .show()
                 } else {
@@ -195,7 +195,7 @@ class GameActivity : AppCompatActivity() {
                             enableUI()
                         }
 
-                        if (GameViewModel.playerWon(room)) {
+                        if (GameViewModel.playerWon(room, playerObject)) {
                             GameViewModel.finnishRoom()
                             goToWinnerScreen()
                         }

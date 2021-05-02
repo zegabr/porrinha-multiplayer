@@ -1,5 +1,7 @@
 package com.example.porrinha_multiplayer.viewModel
 
+import com.example.porrinha_multiplayer.model.Player
+import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
 import com.google.firebase.database.DatabaseReference
 
@@ -13,14 +15,7 @@ object LobbyViewModel {
     }
 
     fun initRoom(latitude: Double, longitude: Double, name: String, maxPlayers: Int) {
-        FirebaseRepository.setValue(roomRef.child("latitude"), latitude)
-        FirebaseRepository.setValue(roomRef.child("longitude"), longitude)
-        FirebaseRepository.setValue(roomRef.child("name"), name)
-        FirebaseRepository.setValue(roomRef.child("maxPlayers"), maxPlayers)
-        FirebaseRepository.setValue(roomRef.child("maxRounds"), 3)
-        FirebaseRepository.setValue(roomRef.child("lastRoundSticks"), -1)
-        FirebaseRepository.setValue(roomRef.child("currentRound"), 1)
-        FirebaseRepository.setValue(roomRef.child("processing"), false)
+        FirebaseRepository.setValue(roomRef, Room(1,-1,3, emptyMap<String,Player>(), latitude, longitude, name, maxPlayers, false))
     }
 
     lateinit var roomsRef: DatabaseReference
