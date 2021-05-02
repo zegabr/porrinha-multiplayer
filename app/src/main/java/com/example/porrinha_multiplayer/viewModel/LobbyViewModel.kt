@@ -20,6 +20,7 @@ object LobbyViewModel {
         FirebaseRepository.setValue(roomRef.child("maxRounds"), 3)
         FirebaseRepository.setValue(roomRef.child("lastRoundSticks"), -1)
         FirebaseRepository.setValue(roomRef.child("currentRound"), 1)
+        FirebaseRepository.setValue(roomRef.child("processing"), false)
     }
 
     lateinit var roomsRef : DatabaseReference

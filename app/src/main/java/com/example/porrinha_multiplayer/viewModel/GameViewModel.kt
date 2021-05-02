@@ -1,5 +1,6 @@
 package com.example.porrinha_multiplayer.viewModel
 
+import android.util.Log
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -50,6 +51,7 @@ object GameViewModel {
         room.players = players
         room.lastRoundSticks = totalSelectedSticks
         room.currentRound = room.currentRound?.plus(1)
+        room.processing = false
         return room
     }
 
@@ -57,11 +59,12 @@ object GameViewModel {
         var maxDifference = 0
         if (players != null) {
             for (player in players){ // pega a diferenca maxima
-                maxDifference = max(maxDifference, abs(totalSelectedSticks - player.value.selectedSticks!!))
+                maxDifference = max(maxDifference, abs(totalSelectedSticks - player.value.finalGuess!!))
                 player.value.played = false
             }
             for (player in players){ // remove um de todos que tem diferenca igual a diferenca maxima
-                if(abs(totalSelectedSticks - player.value.selectedSticks!!) == maxDifference){
+                val playerDifference = abs(totalSelectedSticks - player.value.finalGuess!!)
+                if(playerDifference == maxDifference){
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
                 }
             }
@@ -137,6 +140,13 @@ object GameViewModel {
         FirebaseRepository.setValue(roomRef.child("maxRounds"), newMaxRounds)
     }
 
+    fun playerLost(player: Player): Boolean {
+        return player.totalSticks == 0
+    }
+
+    fun setProcessing() {
+        FirebaseRepository.setValue(roomRef.child("processing"), true)
+    }
 
 
 }

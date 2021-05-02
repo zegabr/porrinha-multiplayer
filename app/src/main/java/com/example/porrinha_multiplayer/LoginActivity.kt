@@ -35,7 +35,13 @@ class LoginActivity : AppCompatActivity() {
     var username: String = ""
 
     fun verifyPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+        return ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )!= PackageManager.PERMISSION_GRANTED
     }
 
     fun finishActivity() {
@@ -55,12 +61,17 @@ class LoginActivity : AppCompatActivity() {
         button = binding.buttonLogin
 
         while(verifyPermission()) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), 200)
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ), 200
+            )
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
+                .addOnSuccessListener { location: Location? ->
                     if(location != null) {
                         this.location = location
                     }else{ // TODO: por alguma razao o celular de zé vem pra cá msm com location ativada
@@ -76,7 +87,13 @@ class LoginActivity : AppCompatActivity() {
             // pega referencia do user no database
             LoginViewModel.setupUserReference(username)
             addUserRefEventListener(LoginViewModel.userReference)
-            LoginViewModel.setUserReferenceValue(User(username, location.latitude, location.longitude))
+            LoginViewModel.setUserReferenceValue(
+                User(
+                    username,
+                    location.latitude,
+                    location.longitude
+                )
+            )
         }
 
         addLoginButtonClickListener()
@@ -92,7 +109,13 @@ class LoginActivity : AppCompatActivity() {
 
                 LoginViewModel.setupUserReference(username)
                 addUserRefEventListener(LoginViewModel.userReference)
-                LoginViewModel.setUserReferenceValue(User(username,location.latitude, location.longitude))
+                LoginViewModel.setUserReferenceValue(
+                    User(
+                        username,
+                        location.latitude,
+                        location.longitude
+                    )
+                )
             }
         }
     }
@@ -132,8 +155,8 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun addCurrentPlayerToCache() {
         val preferences: SharedPreferences = getSharedPreferences(
-                "PREFS",
-                0
+            "PREFS",
+            0
         )
         val editor = preferences.edit()
         editor.putString("playerName", username) // seta o valor user
