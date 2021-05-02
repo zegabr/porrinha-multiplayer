@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.porrinha_multiplayer.databinding.ActivityLoginBinding
 import com.example.porrinha_multiplayer.model.User
+import com.example.porrinha_multiplayer.viewModel.LobbyViewModel
 import com.example.porrinha_multiplayer.viewModel.LoginViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -30,11 +31,18 @@ class LoginActivity : AppCompatActivity() {
     lateinit var fusedLocationClient: FusedLocationProviderClient
     lateinit var user: User
     lateinit var location: Location
-
+    lateinit var addUserRefListener: ValueEventListener
     var username: String = ""
 
     fun verifyPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+    }
+
+    fun finishActivity() {
+        if(addUserRefListener != null){
+            LoginViewModel.userReference.removeEventListener(addUserRefListener)
+        }
+        finish()
     }
 
     @SuppressLint("MissingPermission")
@@ -93,7 +101,7 @@ class LoginActivity : AppCompatActivity() {
      * Adiciona um listener que checa se a o user atual foi modificado no database
      */
     private fun addUserRefEventListener(userReference: DatabaseReference) {
-        userReference.addValueEventListener(object : ValueEventListener {
+        addUserRefListener = userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var user: User = dataSnapshot.getValue(User::class.java)!!
                 if (!user.username.equals("")) {
@@ -116,7 +124,7 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun goToLobbyScreen() {
         startActivity(Intent(this@LoginActivity, LobbyActivity::class.java))
-        finish()// encerra activity atual
+        finishActivity()// encerra activity atual
     }
 
     /**

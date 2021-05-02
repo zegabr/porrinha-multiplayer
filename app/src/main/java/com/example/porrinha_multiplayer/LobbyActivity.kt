@@ -25,7 +25,7 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var button: Button
     lateinit var preferences: SharedPreferences
     lateinit var roomsList: MutableList<Room>
-
+    lateinit var addRoomsListener : ValueEventListener
     var user: User = User("",0.0,0.0)
     var roomName = ""
 
@@ -51,24 +51,27 @@ class LobbyActivity : AppCompatActivity() {
         addRoomsEventListener() // ativa atualizaca da lista de salas
     }
 
-    private fun addCreateRoomButtonOnClickListener() {
-        button.setOnClickListener(View.OnClickListener {
-            button.setText("CREATING ROOM")
-            button.isEnabled = false
+    private fun finishActivity() {
+        if (addRoomsListener != null){
+            LobbyViewModel.roomsRef.removeEventListener(addRoomsListener) //Removendo o event listener
+        }
+        finish()
+    }
 
-            // cria sala e adiciona o user como um player novo
-            roomName = user.username!!
-            LobbyViewModel.setRoomReference(roomName)
-            LobbyViewModel.initRoom(user.latitude!!, user.longitude!!, user.username!!)
-            GameViewModel.setPlayerReference(roomName, user.username!!)
-            addRoomEventListener()
-            GameViewModel.setPlayerReferenceValue(Player(user.username, 0, -1, 3,false, true, true)) // adiciona o player na sala como host
+    private fun addCreateRoomButtonOnClickListener() {
+        button.setOnClickListener(View.OnClickListener {//Listener para o botão de criar sala
+            val intent = Intent(this@LobbyActivity, CreateRoomActivity::class.java)
+            intent.putExtra("name", user.username)
+            intent.putExtra("latitude", user.latitude)
+            intent.putExtra("longitude", user.longitude)
+            startActivity(intent)
+            finishActivity() // encerra activity atual
         })
     }
 
     private fun addRoomsEventListener() {
         LobbyViewModel.setRoomsReference()
-        LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
+        addRoomsListener = LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // show list of rooms
                 roomsList.clear()
@@ -76,7 +79,7 @@ class LobbyActivity : AppCompatActivity() {
                 val recyclerViewRooms = binding.roomsListRecycler
                 for (room in rooms.iterator()) {
                     var actualRoom = room.getValue(Room::class.java)
-                    if (actualRoom != null && actualRoom.currentRound == 1){
+                    if (actualRoom != null && actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!){
                         roomsList.add(actualRoom) // adiciona todas as salas
                     }
                 }
@@ -92,24 +95,6 @@ class LobbyActivity : AppCompatActivity() {
         })
     }
 
-    private fun addRoomEventListener() {
-        GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(!snapshot.exists()) return
-                // join room
-                enableCreateButton()
-                goToGameScreen()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // error
-                enableCreateButton()
-                Toast.makeText(this@LobbyActivity, "Error", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-
     private fun getPlayerFromCache(): User {
         var username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
@@ -123,24 +108,18 @@ class LobbyActivity : AppCompatActivity() {
      */
     private fun addCurrentRoomToCache() {
         val editor = preferences.edit()
-        editor.putString("roomName", roomName) // seta o valor user
-        editor.apply() // adicionou o username na cache, qnd logar de novo ele vai estar lá
+        editor.putString("roomName", roomName) // seta o valor da sala
+        editor.apply() // adicionou a sala na cache, qnd logar de novo ele vai estar lá
     }
 
     private fun getCurrentRoomFromCache(): String {
         return preferences.getString("roomName", "").toString()
     }
 
-    private fun enableCreateButton() {
-        button.setText("CREATE ROOM")
-        button.isEnabled = true
-    }
-
     private fun goToGameScreen() {
         addCurrentRoomToCache()
         val intent = Intent(this@LobbyActivity, GameActivity::class.java)
-        intent.putExtra("roomName", roomName)
         startActivity(intent)
-        finish() // encerra activity atual
+        finishActivity() // encerra activity atual
     }
 }
