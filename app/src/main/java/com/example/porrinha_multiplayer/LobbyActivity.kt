@@ -78,8 +78,13 @@ class LobbyActivity : AppCompatActivity() {
                     val recyclerViewRooms = binding.roomsListRecycler
                     for (room in rooms.iterator()) {
                         val actualRoom = room.getValue(Room::class.java)
-                        if (actualRoom != null && actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!) {
-                            roomsList.add(actualRoom) // adiciona todas as salas
+                        if (actualRoom != null) {
+                            if (actualRoom.players.isNullOrEmpty()) {
+                                LobbyViewModel.removeRoom(actualRoom.name)
+                                return // vai ser triggado novamente, logo é bom essa chamada do listener parar aqui
+                            } else if (actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!) {
+                                roomsList.add(actualRoom) // adiciona todas as salas
+                            }
                         }
                     }
                     recyclerViewRooms.apply {

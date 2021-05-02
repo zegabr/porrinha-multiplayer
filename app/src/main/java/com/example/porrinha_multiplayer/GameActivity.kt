@@ -1,7 +1,6 @@
 package com.example.porrinha_multiplayer
 
 import android.content.Intent
-import android.R
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -70,9 +69,9 @@ class GameActivity : AppCompatActivity() {
         }
         GameViewModel.setPlayerReference(roomName, playerName)
         addPlayerEventListener() // escuta mudancas no player
-        addRoomEventListener() // escuta mudanças na sala
-        addPlayersListEventListener()
-        GameViewModel.setPlayerName(playerName) // deve triggar os 2 eventlistener
+        addRoomEventListener() // faz o processamento do game
+        addPlayersListEventListener() // atualiza recycler view
+        GameViewModel.setPlayerName(playerName) // deve triggar os 3 eventlistener
 
         playButton.setOnClickListener {
             if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
@@ -244,6 +243,10 @@ class GameActivity : AppCompatActivity() {
     private fun enableUI() {
 //        sticksToPlayEditText.isFocusable = true
 //        finalGuessEditText.isFocusable = true
+
+//        sticksToPlayEditText.clearFocus()
+//        finalGuessEditText.clearFocus()
+
         playButton.text = "Play"
         playButton.isEnabled = true
     }
@@ -251,6 +254,9 @@ class GameActivity : AppCompatActivity() {
     private fun disableUI() {
 //        sticksToPlayEditText.isFocusable = false
 //        finalGuessEditText.isFocusable = false
+
+//        sticksToPlayEditText.clearFocus()
+//        finalGuessEditText.clearFocus()
 
         sticksToPlayEditText.text.clear()
         finalGuessEditText.text.clear()

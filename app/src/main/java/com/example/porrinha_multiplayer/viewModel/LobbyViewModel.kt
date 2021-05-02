@@ -23,6 +23,10 @@ object LobbyViewModel {
         FirebaseRepository.setValue(roomRef.child("processing"), false)
     }
 
+    fun removeRoom(name: String) {
+        FirebaseRepository.removeReference(roomsRef.child(name))
+    }
+
     lateinit var roomsRef: DatabaseReference
     lateinit var roomRef: DatabaseReference
 }
