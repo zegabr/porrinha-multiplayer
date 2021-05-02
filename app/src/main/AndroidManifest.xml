@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Porrinhamultiplayer">
-        <activity android:name=".LooserActivity"></activity>
+        <activity android:name=".CreateRoomActivity" />
+        <activity android:name=".LooserActivity" />
         <activity android:name=".WinnerActivity" />
         <activity android:name=".GameActivity" />
         <activity android:name=".LobbyActivity" />
