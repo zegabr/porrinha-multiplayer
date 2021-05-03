@@ -98,9 +98,9 @@ class GameActivity : AppCompatActivity() {
                     playerObject.played = true
                     playerObject.selectedSticks = sticksToPlay
                     playerObject.finalGuess = finalGuess
-
                     disableUI()
 
+                    GameViewModel.wonLastRound = 0
                     GameViewModel.setPlayerReferenceValue(playerObject)
                 }
             }
@@ -176,7 +176,7 @@ class GameActivity : AppCompatActivity() {
                             // update processing pra true
                             GameViewModel.setProcessing()
                             // processa jogo seando processing pra false
-                            room = GameViewModel.processGameState(room)
+                            room = GameViewModel.processGameState(room, playerName, this@GameActivity)
                             // update room com is processing pra false tbm
                             GameViewModel.updateRoom(room)
                         }
@@ -238,13 +238,19 @@ class GameActivity : AppCompatActivity() {
         } else {
             disableUI()
         }
+
         if(GameViewModel.wonLastRound == 1){
-            Toast.makeText(applicationContext,"Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT)
+            Toast.makeText(this@GameActivity, "Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT).show()
         }else if(GameViewModel.wonLastRound == 2){
-            Toast.makeText(applicationContext,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT)
+            Toast.makeText(this@GameActivity,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT).show()
+        }
+        if (playerObject.totalSticks == 0) { // Player perdeu
+            goToLooserScreen()
+            GameViewModel.removePlayerFromRoom()
         }
         GameViewModel.isHost = playerObject.host == true
     }
+
 
     private fun enableUI() {
         playButton.text = "Play"

@@ -1,5 +1,7 @@
 package com.example.porrinha_multiplayer.viewModel
 
+import android.content.Context
+import android.widget.Toast
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -43,7 +45,7 @@ object GameViewModel {
         return total
     }
 
-    fun processGameState(room: Room): Room {
+    fun processGameState(room: Room, playerName: String, applicationContext: Context): Room {
         var players = room.players
         val totalSelectedSticks =
             this.getTotalSelectedSticks(players) // soma de sticks selecionados na rodada
