@@ -1,6 +1,7 @@
 package com.example.porrinha_multiplayer
 
 import android.content.Intent
+import android.R
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,6 +20,7 @@ import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import kotlin.math.max
 
 class GameActivity : AppCompatActivity() {
 
@@ -70,8 +72,8 @@ class GameActivity : AppCompatActivity() {
         addPlayerEventListener() // escuta mudancas no player
         addRoomEventListener() // escuta mudanças na sala
         addPlayersListEventListener()
-        GameViewModel.setPlayerIsOnline(true) // deve triggar os 2 eventlistener
-
+        GameViewModel.setPlayerName(playerName) // deve triggar os 2 eventlistener
+        GameViewModel.inGame = true
         playButton.setOnClickListener {
             if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
                 Toast.makeText(
@@ -89,25 +91,16 @@ class GameActivity : AppCompatActivity() {
                         "This is more than you have",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else if (sticksToPlay <= 0 || finalGuess <= 0) {
+                } else if (sticksToPlay < 0 || finalGuess < 0) {
                     Toast.makeText(applicationContext, "Quantity not allowed", Toast.LENGTH_SHORT)
                         .show()
                 } else {
                     playerObject.played = true
                     playerObject.selectedSticks = sticksToPlay
                     playerObject.finalGuess = finalGuess
+                    disableUI()
 
-                    sticksToPlayEditText.isEnabled = false
-                    sticksToPlayEditText.isClickable = false
-                    sticksToPlayEditText.isFocusable = false
-
-                    finalGuessEditText.isEnabled = false
-                    finalGuessEditText.isClickable = false
-                    finalGuessEditText.isFocusable = false
-
-                    playButton.isEnabled = false
-                    playButton.text = "Waiting..."
-
+                    GameViewModel.wonLastRound = 0
                     GameViewModel.setPlayerReferenceValue(playerObject)
                 }
             }
@@ -122,20 +115,25 @@ class GameActivity : AppCompatActivity() {
     private fun addPlayersListEventListener() {
         GameViewModel.playersRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (!snapshot.hasChild(playerName)) return // evita fazer outrsa coisas se o player ja saiu da sala
+                if (!snapshot.hasChild(playerName)) return // evita fazer outras coisas se o player ja saiu da sala
                 // show list of rooms
                 playersList.clear()
                 val players = snapshot.children
 
                 for (player in players.iterator()) {
                     var actualPlayer = player.getValue(Player::class.java)
-                    if (actualPlayer != null){
+                    if (actualPlayer != null) {
                         playersList.add(actualPlayer)
                     }
                 }
                 playersRecyclerView.apply {
                     layoutManager = LinearLayoutManager(this@GameActivity)
-                    addItemDecoration(DividerItemDecoration(this@GameActivity, DividerItemDecoration.VERTICAL))
+                    addItemDecoration(
+                        DividerItemDecoration(
+                            this@GameActivity,
+                            DividerItemDecoration.VERTICAL
+                        )
+                    )
                     adapter = PlayersAdapter(playersList, layoutInflater)
                 }
             }
@@ -157,12 +155,32 @@ class GameActivity : AppCompatActivity() {
 
                 room = snapshot.getValue(Room::class.java)!!
                 var players = room.players
-
                 if (players != null) {
-                    if (GameViewModel.isHost && players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
-                        room = GameViewModel.processGameState(room, playerName, this@GameActivity)
-                        GameViewModel.updateRoom(room)
-                    } else if (!GameViewModel.isHost) {
+
+                    if (room.processing) { // se for fazer algo enquanto processa, só pode leitura
+                        playerObject = players[playerName]!!
+                        return
+                    }
+
+
+                    if (GameViewModel.isHost) {
+                        // update maxRounds
+                        GameViewModel.updateMaxRounds(
+                            max(
+                                room.maxRounds!!,
+                                3 * players.values.size
+                            )
+                        )
+
+                        if (players.size != 1 && GameViewModel.allPlayersHavePlayed(players)) {
+                            // update processing pra true
+                            GameViewModel.setProcessing()
+                            // processa jogo seando processing pra false
+                            room = GameViewModel.processGameState(room, playerName, this@GameActivity)
+                            // update room com is processing pra false tbm
+                            GameViewModel.updateRoom(room)
+                        }
+                    } else {
                         if (!GameViewModel.hasHost(players)) {
                             players = GameViewModel.setFirstPlayerAsHost(players, playerName)
                             room.players = players
@@ -171,19 +189,15 @@ class GameActivity : AppCompatActivity() {
                     }
 
                     if (players != null) {
-                        if (GameViewModel.playerWon(room, players)) {
-                            goToWinnerScreen()
-                            GameViewModel.finnishRoom()
-                        }
-                        playerObject = players.get(playerName)!!
+
+                        playerObject = players[playerName]!!
                         if (playerObject.played == false) {
-                            sticksToPlayEditText.isEnabled = true
-                            sticksToPlayEditText.isClickable = true
-                            sticksToPlayEditText.isFocusable = true
-                            finalGuessEditText.isEnabled = true
-                            finalGuessEditText.isClickable = true
-                            finalGuessEditText.isFocusable = true
-                            playButton.text = "Play"
+                            enableUI()
+                        }
+
+                        if (GameViewModel.playerWon(room, playerObject)) {
+                            GameViewModel.finnishRoom()
+                            goToWinnerScreen()
                         }
                     }
                 }
@@ -198,24 +212,18 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+
     private fun addPlayerEventListener() {
         GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) return
                 playerObject = snapshot.getValue(Player::class.java)!!
-                playerTotalSticksTextView.text = playerObject.totalSticks.toString()
-                playButton.isEnabled =
-                    playerObject.played == false // só pode apertar play se nao tiver jogado, o played vai ser atualizado no processamento do jogo
-                GameViewModel.isHost = playerObject.host == true
 
-                if(GameViewModel.wonLastRound == 1){
-                    Toast.makeText(applicationContext,"Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT)
-                }else if(GameViewModel.wonLastRound == 2){
-                    Toast.makeText(applicationContext,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT)
-                }
-                if (playerObject.totalSticks == 0) { // Player perdeu
-                    goToLooserScreen()
+                updatePlayerUI(playerObject)
+
+                if (GameViewModel.playerLost(playerObject)) {
                     GameViewModel.removePlayerFromRoom()
+                    goToLooserScreen()
                 }
             }
 
@@ -223,19 +231,60 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+    private fun updatePlayerUI(playerObject: Player) {
+        playerTotalSticksTextView.text = playerObject.totalSticks.toString()
+        if (playerObject.played == false) {
+            enableUI()
+        } else {
+            disableUI()
+        }
+
+        if(GameViewModel.wonLastRound == 1){
+            Toast.makeText(this@GameActivity, "Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT).show()
+        }else if(GameViewModel.wonLastRound == 2){
+            Toast.makeText(this@GameActivity,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT).show()
+        }
+        if (playerObject.totalSticks == 0) { // Player perdeu
+            goToLooserScreen()
+            GameViewModel.removePlayerFromRoom()
+        }
+        GameViewModel.isHost = playerObject.host == true
+    }
+
+
+    private fun enableUI() {
+        playButton.text = "Play"
+        playButton.isEnabled = true
+    }
+
+    private fun disableUI() {
+        sticksToPlayEditText.text.clear()
+        finalGuessEditText.text.clear()
+
+        playButton.isEnabled = false
+        playButton.text = "Waiting..."
+    }
+
     private fun goToLooserScreen() {
-        removeCurrentRoomFromCache()
-        startActivity(Intent(this@GameActivity, LooserActivity::class.java))
-        finish()
+        if(GameViewModel.inGame) {
+            GameViewModel.inGame = false
+            removeCurrentRoomFromCache()
+            startActivity(Intent(this@GameActivity, LooserActivity::class.java))
+            finish()
+        }
     }
 
     private fun goToWinnerScreen() {
-        removeCurrentRoomFromCache()
-        startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
-        finish()
+        if(GameViewModel.inGame){
+            GameViewModel.inGame = false
+            removeCurrentRoomFromCache()
+            startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
+            finish()
+        }
     }
 
     private fun goToLobbyScreen() {
+
         removeCurrentRoomFromCache()
         startActivity(Intent(this@GameActivity, LobbyActivity::class.java))
         finish()

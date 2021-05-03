@@ -35,7 +35,13 @@ class LoginActivity : AppCompatActivity() {
     var username: String = ""
 
     fun verifyPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+        return ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
     }
 
     fun finishActivity() {
@@ -54,21 +60,26 @@ class LoginActivity : AppCompatActivity() {
         editText = binding.editTextLogin
         button = binding.buttonLogin
 
-        while(verifyPermission()) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), 200)
+        while (verifyPermission()) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ), 200
+            )
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
-                    if(location != null) {
-                        this.location = location
-                    }else{ // TODO: por alguma razao o celular de zé vem pra cá msm com location ativada
-                        this.location = Location("")
-                        this.location.longitude = -34.5
-                        this.location.latitude = -8.2
-                    }
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    this.location = location
+                } else {
+                    this.location = Location("")
+                    this.location.longitude = -34.5
+                    this.location.latitude = -8.2
                 }
+            }
 
         // checks if user name exists and get reference
         user = getPlayerFromCache()
@@ -76,7 +87,13 @@ class LoginActivity : AppCompatActivity() {
             // pega referencia do user no database
             LoginViewModel.setupUserReference(username)
             addUserRefEventListener(LoginViewModel.userReference)
-            LoginViewModel.setUserReferenceValue(User(username, location.latitude, location.longitude))
+            LoginViewModel.setUserReferenceValue(
+                User(
+                    username,
+                    location.latitude,
+                    location.longitude
+                )
+            )
         }
 
         addLoginButtonClickListener()
@@ -92,7 +109,13 @@ class LoginActivity : AppCompatActivity() {
 
                 LoginViewModel.setupUserReference(username)
                 addUserRefEventListener(LoginViewModel.userReference)
-                LoginViewModel.setUserReferenceValue(User(username,location.latitude, location.longitude))
+                LoginViewModel.setUserReferenceValue(
+                    User(
+                        username,
+                        location.latitude,
+                        location.longitude
+                    )
+                )
             }
         }
     }
@@ -103,7 +126,7 @@ class LoginActivity : AppCompatActivity() {
     private fun addUserRefEventListener(userReference: DatabaseReference) {
         addUserRefListener = userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                var user: User = dataSnapshot.getValue(User::class.java)!!
+                val user: User = dataSnapshot.getValue(User::class.java)!!
                 if (!user.username.equals("")) {
                     addCurrentPlayerToCache()
                     goToLobbyScreen() // chama a proxima tela
@@ -116,7 +139,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Error Logging in", Toast.LENGTH_SHORT).show()
             }
         })
-
     }
 
     /**
@@ -132,8 +154,8 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun addCurrentPlayerToCache() {
         val preferences: SharedPreferences = getSharedPreferences(
-                "PREFS",
-                0
+            "PREFS",
+            0
         )
         val editor = preferences.edit()
         editor.putString("playerName", username) // seta o valor user
@@ -150,7 +172,7 @@ class LoginActivity : AppCompatActivity() {
         username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
-        if(!username.equals("")) {
+        if (!username.equals("")) {
             location = Location("")
             location.latitude = latitude
             location.longitude = longitude

@@ -9,11 +9,9 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.porrinha_multiplayer.databinding.ActivityLobbyBinding
-import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.model.User
 import com.example.porrinha_multiplayer.viewHolder.RoomsAdapter
-import com.example.porrinha_multiplayer.viewModel.GameViewModel
 import com.example.porrinha_multiplayer.viewModel.LobbyViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,8 +23,8 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var button: Button
     lateinit var preferences: SharedPreferences
     lateinit var roomsList: MutableList<Room>
-    lateinit var addRoomsListener : ValueEventListener
-    var user: User = User("",0.0,0.0)
+    lateinit var addRoomsListener: ValueEventListener
+    var user: User = User("", 0.0, 0.0)
     var roomName = ""
 
     lateinit var binding: ActivityLobbyBinding
@@ -71,32 +69,37 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun addRoomsEventListener() {
         LobbyViewModel.setRoomsReference()
-        addRoomsListener = LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // show list of rooms
-                roomsList.clear()
-                val rooms = snapshot.children
-                val recyclerViewRooms = binding.roomsListRecycler
-                for (room in rooms.iterator()) {
-                    var actualRoom = room.getValue(Room::class.java)
-                    if (actualRoom != null && actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!){
-                        roomsList.add(actualRoom) // adiciona todas as salas
+        addRoomsListener =
+            LobbyViewModel.roomsRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // show list of rooms
+                    roomsList.clear()
+                    val rooms = snapshot.children
+                    val recyclerViewRooms = binding.roomsListRecycler
+                    for (room in rooms.iterator()) {
+                        val actualRoom = room.getValue(Room::class.java)
+                        if (actualRoom != null && actualRoom.currentRound == 1 && actualRoom.players!!.size < actualRoom.maxPlayers!!) {
+                            roomsList.add(actualRoom) // adiciona todas as salas
+                        }
+                    }
+                    recyclerViewRooms.apply {
+                        layoutManager = LinearLayoutManager(this@LobbyActivity)
+                        adapter = RoomsAdapter(roomsList, user, preferences, layoutInflater)
                     }
                 }
-                recyclerViewRooms.apply {
-                    layoutManager = LinearLayoutManager(this@LobbyActivity)
-                    adapter = RoomsAdapter(roomsList, user, preferences, layoutInflater)
-                }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@LobbyActivity, "Error reading list of rooms", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(
+                        this@LobbyActivity,
+                        "Error reading list of rooms",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     private fun getPlayerFromCache(): User {
-        var username = preferences.getString("playerName", "").toString()
+        val username = preferences.getString("playerName", "").toString()
         val latitude = preferences.getFloat("latitude", 0F).toDouble()
         val longitude = preferences.getFloat("longitude", 0F).toDouble()
 
