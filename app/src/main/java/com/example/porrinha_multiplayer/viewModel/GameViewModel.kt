@@ -1,7 +1,6 @@
 package com.example.porrinha_multiplayer.viewModel
 
 import android.content.Context
-import android.widget.Toast
 import com.example.porrinha_multiplayer.model.Player
 import com.example.porrinha_multiplayer.model.Room
 import com.example.porrinha_multiplayer.repository.FirebaseRepository
@@ -144,7 +143,7 @@ object GameViewModel {
     fun playerWon(room: Room, player: Player): Boolean {
         val players = room.players
         if (players != null) {
-            return (players.size == 1 && room.currentRound != 1)
+            return (players.size == 1 && room.currentRound != 1 && player.totalSticks != 0)
         } // só existe 1 player e já passou da 1a rodada
         return false
     }
@@ -160,7 +159,5 @@ object GameViewModel {
     fun setProcessing() {
         FirebaseRepository.setValue(roomRef.child("processing"), true)
     }
-
-
 }
 
