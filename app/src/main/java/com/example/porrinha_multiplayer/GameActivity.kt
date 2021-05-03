@@ -1,7 +1,6 @@
 package com.example.porrinha_multiplayer
 
 import android.content.Intent
-import android.R
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -34,6 +33,10 @@ class GameActivity : AppCompatActivity() {
     lateinit var playerTotalSticksTextView: TextView
     lateinit var sticksToPlayEditText: EditText
     lateinit var finalGuessEditText: EditText
+
+    lateinit var playerEventListener : ValueEventListener
+    lateinit var roomEventListener : ValueEventListener
+    lateinit var playersListEventListener : ValueEventListener
 
     var playerName = ""
     var roomName = ""
@@ -69,10 +72,10 @@ class GameActivity : AppCompatActivity() {
             roomNameTextView.text = roomName
         }
         GameViewModel.setPlayerReference(roomName, playerName)
-        addPlayerEventListener() // escuta mudancas no player
-        addRoomEventListener() // escuta mudanças na sala
-        addPlayersListEventListener()
-        GameViewModel.setPlayerName(playerName) // deve triggar os 2 eventlistener
+        startPlayerEventListener() // escuta mudancas no player
+        startRoomEventListener() // escuta mudanças na sala
+        startPlayersListEventListener()
+        GameViewModel.setPlayerName(playerName) // deve triggar os 3 eventlistener
         GameViewModel.inGame = true
         playButton.setOnClickListener {
             if (sticksToPlayEditText.text.isBlank() || finalGuessEditText.text.isBlank()) {
@@ -100,7 +103,6 @@ class GameActivity : AppCompatActivity() {
                     playerObject.finalGuess = finalGuess
                     disableUI()
 
-                    GameViewModel.wonLastRound = 0
                     GameViewModel.setPlayerReferenceValue(playerObject)
                 }
             }
@@ -112,8 +114,8 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun addPlayersListEventListener() {
-        GameViewModel.playersRef.addValueEventListener(object : ValueEventListener {
+    private fun startPlayersListEventListener() {
+        playersListEventListener = GameViewModel.playersRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.hasChild(playerName)) return // evita fazer outras coisas se o player ja saiu da sala
                 // show list of rooms
@@ -148,8 +150,8 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
-    private fun addRoomEventListener() {
-        GameViewModel.roomRef.addValueEventListener(object : ValueEventListener {
+    private fun startRoomEventListener() {
+       roomEventListener = GameViewModel.roomRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists() || !snapshot.hasChild("players/$playerName")) return
 
@@ -213,8 +215,8 @@ class GameActivity : AppCompatActivity() {
     }
 
 
-    private fun addPlayerEventListener() {
-        GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
+    private fun startPlayerEventListener() {
+       playerEventListener = GameViewModel.playerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) return
                 playerObject = snapshot.getValue(Player::class.java)!!
@@ -239,11 +241,6 @@ class GameActivity : AppCompatActivity() {
             disableUI()
         }
 
-        if(GameViewModel.wonLastRound == 1){
-            Toast.makeText(this@GameActivity, "Fim da rodada! Você não perdeu nenhum palito", Toast.LENGTH_SHORT).show()
-        }else if(GameViewModel.wonLastRound == 2){
-            Toast.makeText(this@GameActivity,"Fim da rodada! Você perdeu um palito", Toast.LENGTH_SHORT).show()
-        }
         if (playerObject.totalSticks == 0) { // Player perdeu
             goToLooserScreen()
             GameViewModel.removePlayerFromRoom()
@@ -270,7 +267,7 @@ class GameActivity : AppCompatActivity() {
             GameViewModel.inGame = false
             removeCurrentRoomFromCache()
             startActivity(Intent(this@GameActivity, LooserActivity::class.java))
-            finish()
+            finishActivity()
         }
     }
 
@@ -279,15 +276,14 @@ class GameActivity : AppCompatActivity() {
             GameViewModel.inGame = false
             removeCurrentRoomFromCache()
             startActivity(Intent(this@GameActivity, WinnerActivity::class.java))
-            finish()
+            finishActivity()
         }
     }
 
     private fun goToLobbyScreen() {
-
         removeCurrentRoomFromCache()
         startActivity(Intent(this@GameActivity, LobbyActivity::class.java))
-        finish()
+        finishActivity()
     }
 
     private fun updateRoomValuesOnScreen(room: Room) {
@@ -314,5 +310,18 @@ class GameActivity : AppCompatActivity() {
         val editor = preferences.edit()
         editor.putString("roomName", "")
         editor.apply()
+    }
+
+    private fun finishActivity(){
+        if (playerEventListener!=null){
+            GameViewModel.playerRef.removeEventListener(playerEventListener)
+        }
+        if (playersListEventListener!=null){
+            GameViewModel.playerRef.removeEventListener(playersListEventListener)
+        }
+        if (roomEventListener!=null){
+            GameViewModel.playerRef.removeEventListener(roomEventListener)
+        }
+        finish()
     }
 }

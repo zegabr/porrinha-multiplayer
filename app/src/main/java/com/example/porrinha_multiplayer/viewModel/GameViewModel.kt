@@ -10,7 +10,6 @@ import kotlin.math.max
 
 object GameViewModel {
     var inGame: Boolean = false
-    var wonLastRound: Int = 0
     var isHost: Boolean = false
     lateinit var playerRef: DatabaseReference
     lateinit var roomRef: DatabaseReference
@@ -73,9 +72,7 @@ object GameViewModel {
                 val playerDifference = abs(totalSelectedSticks - player.value.finalGuess!!)
                 if (playerDifference == maxDifference) {
                     player.value.totalSticks = player.value.totalSticks?.minus(1)
-                    this.wonLastRound = 2
                 }else{
-                    this.wonLastRound = 1
                 }
             }
         }

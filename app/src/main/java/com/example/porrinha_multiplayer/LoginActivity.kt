@@ -60,6 +60,10 @@ class LoginActivity : AppCompatActivity() {
         editText = binding.editTextLogin
         button = binding.buttonLogin
 
+        this.location = Location("")
+        this.location.longitude = -34.5
+        this.location.latitude = -8.2
+
         if(verifyPermission()){
             ActivityCompat.requestPermissions(
                 this, arrayOf(
@@ -75,10 +79,7 @@ class LoginActivity : AppCompatActivity() {
                 if (location != null) {
                     this.location = location
                 } else {
-                    Toast.makeText(this,"Infelizmente não conseguimos ter acesso a sua localização, usando uma localização padrão", Toast.LENGTH_SHORT)
-                    this.location = Location("")
-                    this.location.longitude = -34.5
-                    this.location.latitude = -8.2
+                    Toast.makeText(this,"Infelizmente não conseguimos ter acesso a sua localização, usando uma localização padrão", Toast.LENGTH_SHORT).show()
                 }
             }
 
